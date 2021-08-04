@@ -1,9 +1,9 @@
 class Figure:
-    def __init__(self, position, picture, team, name):
+    def __init__(self, name, position, picture="Image", team=False):
+        self._name = name
         self._position = position
         self._picture = picture
         self._team = team
-        self._name = name
 
     def get_position(self):
         return self._position
