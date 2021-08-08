@@ -1,3 +1,4 @@
+import copy
 # Black are at the top, are False and small letters
 class Figure:
     def __init__(self, name, position, picture="Image", team=False):
@@ -55,7 +56,7 @@ class Figure:
         return array
 
     def check_if_check(self, board, new_position):
-        board_copy = board
+        board_copy = copy.deepcopy(board)
         board_copy.change_figure_position(self._position, new_position)
         return board_copy.is_check(self._team)
 
@@ -74,28 +75,24 @@ class Figure:
             if self._long_step_move:
                 while new_x >= 0 and new_x < 8 and new_y >= 0 and new_y < 8:
                     if board_array[new_x][new_y].get_name() == " ":
-                        if self.check_if_check(board, [new_x, new_y]):
-                            continue
-                        array.append([new_x, new_y])
+                        if not self.check_if_check(board, [new_x, new_y]):
+                            array.append([new_x, new_y])
                     else:
                         if board_array[new_x][new_y].get_team() != self._team:
-                            if self.check_if_check(board, [new_x, new_y]):
-                                continue
-                            array.append([new_x, new_y])
+                            if not self.check_if_check(board, [new_x, new_y]):
+                                array.append([new_x, new_y])
                         break
                     new_x += combination[0]
                     new_y += combination[1]
             else:
                 if new_x >= 0 and new_x < 8 and new_y >= 0 and new_y < 8:
                     if board_array[new_x][new_y].get_name() == " ":
-                        if self.check_if_check(board, [new_x, new_y]):
-                            continue
-                        array.append([new_x, new_y])
+                        if not self.check_if_check(board, [new_x, new_y]):
+                            array.append([new_x, new_y])
                     else:
                         if board_array[new_x][new_y].get_team() != self._team:
-                            if self.check_if_check(board, [new_x, new_y]):
-                                continue
-                            array.append([new_x, new_y])
+                            if not self.check_if_check(board, [new_x, new_y]):
+                               array.append([new_x, new_y])
         return array
     
     def __str__(self):
