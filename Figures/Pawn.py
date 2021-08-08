@@ -14,26 +14,31 @@ class Pawn(Figure):
 
     def check_next_field(self, board):
         array = []
-        y = self._position[0]
-        x = self._position[1]
+        x = self._position[0]
+        y = self._position[1]
 
-        step = 1
+        board_array = board.get_array()
+        step = -1
         if not self._team:
-            step = -1
+            step = 1
 
-        new_y = y
+        new_x = x
 
         number_of_steps = 2
         if self._is_moved:
             number_of_steps = 1
 
         for i in range(number_of_steps):
-            new_y += step
-            if new_y >= 0 and new_y < 8:
-                if board[x][new_y].get_name() == " ":
-                    array.append([x, new_y])
+            new_x += step
+            if new_x >= 0 and new_x < 8:
+                if board_array[new_x][y].get_name() == " ":
+                    if self.check_if_check(board, [new_x, y]):
+                        continue
+                    array.append([new_x, y])
                 else:
-                    if board[x][new_y].get_team() != self._team:
-                        array.append([x, new_y])
+                    if board_array[new_x][y].get_team() != self._team:
+                        if self.check_if_check(board, [new_x, y]):
+                            continue
+                        array.append([new_x, y])
 
         return array
