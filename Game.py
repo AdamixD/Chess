@@ -42,7 +42,7 @@ class Game:
             if figure.get_team() == player.get_team():
                 is_ok = True
 
-        next_fields_list = figure.check_next_field(self._board.get_array())
+        next_fields_list = figure.check_next_field(self._board)
 
         is_ok = False
         while not is_ok:
