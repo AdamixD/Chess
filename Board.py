@@ -135,25 +135,17 @@ class Board:
 
 
     def is_check(self, team):
+        if team:
+            king_position = self._kingW_position
+        else:
+            king_position = self._kingB_position
+        
         for i in range(8):
             for j in range(8):
                 figure = self._array[i][j]
-                if team:
-                    if figure.get_name() != " " and figure.get_team() != team:
-                        next_field_list = figure.check_next_field(self._array)
-                        for next_field in next_field_list:
-                            print(next_field)
-                            print(self._kingW_position)
-                            if next_field == self._kingW_position:
-                                return True
-                else:
-                    if figure.get_name() != " " and figure.get_team() != team:
-                        next_field_list = figure.check_next_field(self._array)
-                        print(figure.get_name())
-                        for next_field in next_field_list:
-                            print(next_field)
-                            print(self._kingB_position)
-                            if next_field == self._kingB_position:
-                                return True
-                        print("---------------------------------------------")
+                if figure.get_name() != " " and figure.get_team() != team:
+                    next_field_list = figure.check_next_field_simple(self)
+                    for next_field in next_field_list:
+                        if next_field == king_position:
+                            return True
         return False
