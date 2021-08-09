@@ -1,8 +1,15 @@
 class Player:
-    def __init__(self, name, team):
-        self._name = name
+    def __init__(self, team):
         self._team = team
         self._score = 0
+        self.create_name()
+
+    def create_name(self):
+        team_text = "Black"
+        if self._team:
+            team_text = "White"
+        name = input(f"Player {team_text}, what is your name?:  ")
+        self._name = name
 
     def get_name(self):
         return self._name

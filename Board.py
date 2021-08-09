@@ -139,7 +139,7 @@ class Board:
             king_position = self._kingW_position
         else:
             king_position = self._kingB_position
-        
+
         for i in range(8):
             for j in range(8):
                 figure = self._array[i][j]
@@ -149,24 +149,24 @@ class Board:
                         if next_field == king_position:
                             return True
         return False
-    
+
     def is_checkmate(self, team):
         if team:
             king_position = self._kingW_position
         else:
             king_position = self._kingB_position
-        
+
 
         #check if king has fields to go
         kings_fields_list = self._array[king_position[0]][king_position[1]].check_next_field(self)
         if len(kings_fields_list):
-            return [king_position, kings_fields_list]
-        
+            return False
+
         for i in range(8):
             for j in range(8):
                 figure = self._array[i][j]
                 if figure.get_name() != " " and figure.get_team() == team:
                     next_field_list = figure.check_next_field(self)
                     if len(next_field_list):
-                        return [figure.get_position(), next_field_list]
+                        return False
         return True
