@@ -90,24 +90,24 @@ class Game:
 
                         if new_figure_name == "r":
                             if player.get_team():
-                                new_figure = Rook("R", new_position, "Image", True)
+                                new_figure = Rook("R", new_position, "Images/Rook_W.png", True)
                             else:
-                                new_figure = Rook("r", new_position, "Image", False)
+                                new_figure = Rook("r", new_position, "Images/Rook_B", False)
                         elif new_figure_name == "n":
                             if player.get_team():
-                                new_figure = Knight("N", new_position, "Image", True)
+                                new_figure = Knight("N", new_position, "Images/Knight_W.png", True)
                             else:
-                                new_figure = Knight("n", new_position, "Image", False)
+                                new_figure = Knight("n", new_position, "Images/Knight_B.png", False)
                         elif new_figure_name == "b":
                             if player.get_team():
-                                new_figure = Bishop("B", new_position, "Image", True)
+                                new_figure = Bishop("B", new_position, "Images/Bishop_W.png", True)
                             else:
-                                new_figure = Bishop("b", new_position, "Image", False)
+                                new_figure = Bishop("b", new_position, "Images/Bishop_B.png", False)
                         else:
                             if player.get_team():
-                                new_figure = Queen("Q", new_position, "Image", True)
+                                new_figure = Queen("Q", new_position, "Images/Queen_W.png", True)
                             else:
-                                new_figure= Queen("q", new_position, "Image", False)
+                                new_figure= Queen("q", new_position, "Images/Queen_B.png", False)
 
 
                     figure = self._board.get_array()[new_x][new_y]
