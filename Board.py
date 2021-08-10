@@ -82,23 +82,23 @@ class Board:
         self.addFigure(kingW)
         self.addFigure(kingB)
 
-        self.addFigure(bishopW1)
-        self.addFigure(bishopW2)
-        self.addFigure(bishopB1)
-        self.addFigure(bishopB2)
+        # self.addFigure(bishopW1)
+        # self.addFigure(bishopW2)
+        # self.addFigure(bishopB1)
+        # self.addFigure(bishopB2)
 
         self.addFigure(rookW1)
         self.addFigure(rookB1)
         self.addFigure(rookW2)
         self.addFigure(rookB2)
 
-        self.addFigure(knightW1)
-        self.addFigure(knightW2)
-        self.addFigure(knightB1)
-        self.addFigure(knightB2)
+        # self.addFigure(knightW1)
+        # self.addFigure(knightW2)
+        # self.addFigure(knightB1)
+        # self.addFigure(knightB2)
 
-        self.addFigure(queenW)
-        self.addFigure(queenB)
+        # self.addFigure(queenW)
+        # self.addFigure(queenB)
 
 
     def get_array(self):
@@ -125,14 +125,28 @@ class Board:
         new_x, new_y = new_position
 
         if self._array[old_x][old_y].get_name() == "k":
+            self._array[old_x][old_y].set_is_moved()
             self._kingB_position = [new_x, new_y]
         elif self._array[old_x][old_y].get_name() == "K":
+            self._array[old_x][old_y].set_is_moved()
             self._kingW_position = [new_x, new_y]
+
+        if self._array[old_x][old_y].get_name().lower() == "r":
+            self._array[old_x][old_y].set_is_moved()
 
         self._array[old_x][old_y].set_position([new_x, new_y])
         self._array[new_x][new_y] = self._array[old_x][old_y]
         self._array[old_x][old_y] = EmptyField([old_x, old_y], " ")
 
+    def castling(self, new_king_pos):
+        row = new_king_pos[0]
+
+        if new_king_pos[1] == 2:
+            self.change_figure_position([row, 0], [row, 3])
+        elif new_king_pos[1] == 6:
+            self.change_figure_position([row, 7], [row, 5])
+
+        self.change_figure_position([row, 4], new_king_pos)
 
     def is_check(self, team):
         if team:
@@ -170,3 +184,5 @@ class Board:
                     if len(next_field_list):
                         return False
         return True
+
+

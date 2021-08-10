@@ -62,6 +62,12 @@ class Game:
             else:
                 print("Choose another figure")
 
+        castling_fields = []
+        if figure.get_name().lower() == "k":
+            castling_fields = figure.if_castling(self._board)
+            for new_field in castling_fields:
+                next_fields_list.append(new_field)
+
         print(f"{player.get_name()} you can move this figure to: {next_fields_list}")
 
         is_ok = False
@@ -75,6 +81,9 @@ class Game:
             for next_field in next_fields_list:
                 if next_field == new_position:
                     is_ok = True
+                    if next_field in castling_fields:
+                        self._board.castling(next_field)
+                        break
 
                     if figure.get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
                         new_figure_name = input(f"{player.get_name()}, your pawn will convert to (r, n, b, q): ")
@@ -109,6 +118,7 @@ class Game:
                     self._board.change_figure_position([old_x, old_y], new_position)
                     if new_figure:
                         self._board.addFigure(new_figure)
+                    break
 
             if not is_ok:
                 print("This figure can't go to this field. Try another.")
