@@ -9,8 +9,8 @@ class Pawn(Figure):
     def get_is_moved(self):
         return self._is_moved
 
-    def set_is_moved(self, is_moved):
-        self._is_moved = is_moved
+    def set_is_moved(self):
+        self._is_moved = True
 
     def check_next_field_simple(self, board):
         array = []
@@ -60,6 +60,8 @@ class Pawn(Figure):
 
         for i in range(number_of_steps):
             new_x += step
+            if i == 1 and len(array) == 0:
+                break
             if new_x >= 0 and new_x < 8:
                 if board_array[new_x][y].get_name() == " ":
                     if self.check_if_check(board, [new_x, y]):
@@ -74,5 +76,4 @@ class Pawn(Figure):
                         if not self.check_if_check(board, [new_x, y-step]):
                             array.append([new_x, y-step])
 
-        self._is_moved = True
         return array

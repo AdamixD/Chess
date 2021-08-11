@@ -100,6 +100,11 @@ class Board:
         self.addFigure(queenW)
         self.addFigure(queenB)
 
+    def get_kingW_position(self):
+        return self._kingW_position
+
+    def get_kingB_position(self):
+        return self._kingB_position
 
     def get_array(self):
         return self._array
@@ -132,6 +137,9 @@ class Board:
             self._kingW_position = [new_x, new_y]
 
         if self._array[old_x][old_y].get_name().lower() == "r":
+            self._array[old_x][old_y].set_is_moved()
+
+        if self._array[old_x][old_y].get_name().lower() == "p":
             self._array[old_x][old_y].set_is_moved()
 
         self._array[old_x][old_y].set_position([new_x, new_y])

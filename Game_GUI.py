@@ -1,3 +1,4 @@
+from Figures.Figure import Figure
 from Figures.Knight import Knight
 from Figures.Rook import Rook
 from Figures.King import King
@@ -9,35 +10,187 @@ from Board import Board
 from Player import Player
 from time import time
 
-import pygame
+class Game_Gui:
+    def __init__(self):
+        self._board = Board()
+        self._time = 0
+        self._winner_message = ""
+        # self.create_players()
 
-WIDTH, HEIGHT = 420, 420
-FIELD_SIZE = 60
+    def create_players(self):
+        self._playerW = Player(True)
+        self._playerB = Player(False)
 
-def drawBoard(display):
-    for i in range(8):
-        for j in range(8):
-            if (i+j) % 2 == 0:
-                pygame.draw.rect(display, pygame.Color("white"), pygame.Rect(i*FIELD_SIZE, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
-            else:
-                pygame.draw.rect(display, pygame.Color("green"), pygame.Rect(i*FIELD_SIZE, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
+    def get_board(self):
+        return self._board
 
-def main():
-    pygame.init()
+    def get_time(self):
+        return self._time
 
-    display = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.update()
-    display.fill(pygame.Color('white'))
+    def get_winner_message(self):
+        return self._winner_message
 
-    open = True
-    while open:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                open = False
-        drawBoard(display)
+    def get_playerW(self):
+        return self._playerW
 
-    pygame.quit()
-    quit()
+    def get_playerB(self):
+        return self._playerB
 
-if __name__ == "__main__":
-    main()
+    def set_time(self, new_time):
+        self._time = new_time
+
+    def set_winner_message(self, new_message):
+        self._winner_message = new_message
+
+    def check_choosen_figure(self, player, pos):
+        figure = self._board.get_array()[pos[0]][pos[1]]
+
+        if figure.get_name() != " " and figure.get_team() == player.get_team():
+            next_fields_list = figure.check_next_field(self._board)
+            if len(next_fields_list):
+                return True
+        return False
+
+    def get_castling_fields(self, pos):
+        figure = self._board.get_array()[pos[0]][pos[1]]
+        castling_fields = []
+
+        if figure.get_name().lower() == "k":
+            castling_fields = figure.if_castling(self._board)
+        return castling_fields
+
+    def get_next_fields_list(self, pos):
+        figure = self._board.get_array()[pos[0]][pos[1]]
+        next_fields_list = figure.check_next_field(self._board)
+        castling_fields = self.get_castling_fields(pos)
+
+        for field in castling_fields:
+            next_fields_list.append(field)
+
+        # print(next_fields_list)
+        return next_fields_list
+
+    def check_move(self, old_position, new_position):
+        next_fields_list = self.get_next_fields_list(old_position)
+        for next_field in next_fields_list:
+            if next_field == new_position:
+                return True
+        return False
+
+    def move(self, old_position, new_position):
+        next_fields_list = self.get_next_fields_list(old_position)
+        castling_fields = self.get_castling_fields(old_position)
+
+        for next_field in next_fields_list:
+            if next_field == new_position:
+                if next_field in castling_fields:
+                    self._board.castling(next_field)
+                    break
+                self._board.change_figure_position(old_position, new_position)
+                break
+
+    # def move(self, player):
+    #     old_x, old_y = 0, 0
+    #     figure = EmptyField([0, 0], " ")
+
+    #     is_ok = False
+    #     while not is_ok:
+    #         print(f"{player.get_name()} choose figure: ")
+    #         old_x, old_y = list(map(int, input().split()))
+
+    #         figure = self._board.get_array()[old_x][old_y]
+
+    #         if figure.get_team() == player.get_team():
+    #             next_fields_list = figure.check_next_field(self._board)
+    #             if len(next_fields_list):
+    #                 is_ok = True
+
+    #         elif figure.get_team() != player.get_team() and figure.get_name() != " ":
+    #             print("It is not your figure")
+    #         else:
+    #             print("Choose another figure")
+
+    #     castling_fields = []
+    #     if figure.get_name().lower() == "k":
+    #         castling_fields = figure.if_castling(self._board)
+    #         for new_field in castling_fields:
+    #             next_fields_list.append(new_field)
+
+    #     print(f"{player.get_name()} you can move this figure to: {next_fields_list}")
+
+    #     is_ok = False
+    #     new_figure = None
+
+    #     while not is_ok:
+    #         print(f"{player.get_name()} choose field to move on: ")
+    #         new_position = list(map(int, input().split()))
+    #         new_x, new_y = new_position
+
+    #         for next_field in next_fields_list:
+    #             if next_field == new_position:
+    #                 is_ok = True
+    #                 if next_field in castling_fields:
+    #                     self._board.castling(next_field)
+    #                     break
+
+    #                 if figure.get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
+    #                     new_figure_name = input(f"{player.get_name()}, your pawn will convert to (r, n, b, q): ")
+
+    #                     if new_figure_name == "r":
+    #                         if player.get_team():
+    #                             new_figure = Rook("R", new_position, "Images/Rook_W.png", True)
+    #                         else:
+    #                             new_figure = Rook("r", new_position, "Images/Rook_B", False)
+    #                     elif new_figure_name == "n":
+    #                         if player.get_team():
+    #                             new_figure = Knight("N", new_position, "Images/Knight_W.png", True)
+    #                         else:
+    #                             new_figure = Knight("n", new_position, "Images/Knight_B.png", False)
+    #                     elif new_figure_name == "b":
+    #                         if player.get_team():
+    #                             new_figure = Bishop("B", new_position, "Images/Bishop_W.png", True)
+    #                         else:
+    #                             new_figure = Bishop("b", new_position, "Images/Bishop_B.png", False)
+    #                     else:
+    #                         if player.get_team():
+    #                             new_figure = Queen("Q", new_position, "Images/Queen_W.png", True)
+    #                         else:
+    #                             new_figure= Queen("q", new_position, "Images/Queen_B.png", False)
+
+
+    #                 figure = self._board.get_array()[new_x][new_y]
+    #                 # TODO
+    #                 if not figure.get_name() == " ":
+    #                     pass
+
+    #                 self._board.change_figure_position([old_x, old_y], new_position)
+    #                 if new_figure:
+    #                     self._board.addFigure(new_figure)
+    #                 break
+
+    #         if not is_ok:
+    #             print("This figure can't go to this field. Try another.")
+
+    # def play(self):
+    #     checkmateW = False
+    #     checkmateB = False
+    #     winner = None
+    #     # round True is for white
+    #     round = True
+    #     while True:
+    #         self._board.print_board()
+    #         if round:
+    #             round = False
+    #             self.move(self._playerW)
+    #             if self._board.is_checkmate(False):
+    #                 winner = self._playerW
+    #                 break
+    #         else:
+    #             round = True
+    #             self.move(self._playerB)
+    #             if self._board.is_checkmate(True):
+    #                 winner = self._playerB
+    #                 break
+
+    #     winner.won()
+    #     print(f"{winner.get_name()} won this round")
