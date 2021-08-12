@@ -166,7 +166,7 @@ class Board:
             for j in range(8):
                 figure = self._array[i][j]
                 if figure.get_name() != " " and figure.get_team() != team:
-                    next_field_list = figure.check_next_field_simple(self)
+                    next_field_list = figure.check_next_field(self, False)
                     for next_field in next_field_list:
                         if next_field == king_position:
                             return True

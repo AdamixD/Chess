@@ -9,29 +9,28 @@ class King(Figure):
 
     def if_castling(self, board):
         fields_for_castling = []
+
+        team = self._team
+        if board.is_check(team):
+            return fields_for_castling
+        
         if not self._is_moved:
             array = board.get_array()
             row = self.get_position()[0]
 
-            if array[row][0].get_name().lower() == "r" and not array[row][0].get_is_moved():
-                castling = True
-                for i in range(1, 4):
-                    if array[row][i].get_name() != " ":
-                        castling = False
-                        break
+            castling_data = [[0, [1, 4], 2], [7, [5, 7], 6]]
 
-                if castling:
-                    fields_for_castling.append([row, 2])
+            for data in castling_data:
+                if array[row][data[0]].get_name().lower() == "r" and not array[row][data[0]].get_is_moved():
+                    castling = True
+                    
+                    for i in range(data[1][0], data[1][1]):
+                        if array[row][i].get_name() != " ":
+                            castling = False
+                            break
 
-            if array[row][7].get_name().lower() == "r" and not array[row][7].get_is_moved():
-                castling = True
-                for i in range(5, 7):
-                    if array[row][i].get_name() != " ":
-                        castling = False
-                        break
-
-                if castling:
-                    fields_for_castling.append([row, 6])
+                    if castling:
+                        fields_for_castling.append([row, data[2]])
 
         return fields_for_castling
 
