@@ -1,3 +1,4 @@
+from typing import Counter
 from Figures.Figure import Figure
 from Figures.Knight import Knight
 from Figures.Rook import Rook
@@ -12,8 +13,10 @@ from time import time
 from Game_GUI import Game_Gui
 import pygame
 
-WIDTH, HEIGHT = 500, 500
+WIDTH, HEIGHT = 820, 510
 M_WIDTH, M_HEIGHT = 300, 200
+BUTTON_HEIGHT = 30
+BUTTON_WIDTH = 90
 
 FIELD_SIZE = 60
 
@@ -22,29 +25,46 @@ BASIC_WHITE = (235, 236, 208)
 WHITE_CIRCLE = (214, 214, 189)
 GREEN_CIRCLE = (106, 135, 77)
 MAIN_COLOR = (55, 55, 55)
+CONTOUR_COLOR = (55, 45, 45)
 
-def drawBoard(display, chackmate_king_pos):
+def draw_play_button(display, is_clicked):
+    if is_clicked:
+        play_image = pygame.image.load("Images/Play_yes.png")
+        display.blit(play_image, (510, 300))
+    else:
+        play_image = pygame.image.load("Images/Play_no.png")
+        display.blit(play_image, (510, 300))
+
+def draw_launch_window(display):
+    background_image = pygame.image.load("Images/background.jpg")
+    logo_image = pygame.image.load("Images/new_logo.png")
+    display.blit(background_image, (0, 0))
+    display.blit(logo_image, (500, 50))
+    draw_play_button(display, False)
+
+def draw_board(display, chackmate_king_pos):
     for i in range(8):
         font = pygame.font.SysFont('arial', 15)
         label = font.render(str(i+1), 0.5, (206, 206, 206))
-        display.blit(label, (485, 15 + FIELD_SIZE*i))
+        display.blit(label, (15, 10 + FIELD_SIZE*i))
         for j in range(8):
             if (i+j) % 2 == 0:
-                pygame.draw.rect(display, pygame.Color(BASIC_WHITE), pygame.Rect(i*FIELD_SIZE, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
+                pygame.draw.rect(display, pygame.Color(BASIC_WHITE), pygame.Rect(i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
             else:
-                pygame.draw.rect(display, pygame.Color(BASIC_GREEN), pygame.Rect(i*FIELD_SIZE, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
+                pygame.draw.rect(display, pygame.Color(BASIC_GREEN), pygame.Rect(i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
             if i == 7:
                 font = pygame.font.SysFont('arial', 15)
                 label = font.render(chr(97+j), 0.5, (206, 206, 206))
-                display.blit(label, (45 + FIELD_SIZE*j, 480))
+                display.blit(label, (45 + FIELD_SIZE//2 + FIELD_SIZE*j, 480))
     if len(chackmate_king_pos):
-        pygame.draw.rect(display, pygame.Color("Red"), pygame.Rect(chackmate_king_pos[1]*FIELD_SIZE, chackmate_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
+        pygame.draw.rect(display, pygame.Color("Red"), pygame.Rect(chackmate_king_pos[1]*FIELD_SIZE + FIELD_SIZE//2, chackmate_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
 
-def drawFigures(display, array, next_fields_list=[]):
+
+def draw_figures(display, array, next_fields_list=[]):
     for field in next_fields_list:
         field_x = field[1]
         field_y = field[0]
-        x = (field_x + 1/2)*FIELD_SIZE
+        x = (field_x + 1/2)*FIELD_SIZE + FIELD_SIZE//2
         y = (field_y + 1/2)*FIELD_SIZE
         color = WHITE_CIRCLE
         if (field_x + field_y)%2 != 0:
@@ -60,9 +80,10 @@ def drawFigures(display, array, next_fields_list=[]):
             figure = array[j][i]
             if figure.get_name() != " ":
                 image = pygame.image.load(figure.get_picture())
-                display.blit(image, (i*FIELD_SIZE, j*FIELD_SIZE))
+                display.blit(image, (i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE))
 
-def drawCheckmateWindow(display, message):
+
+def draw_checkmate_window(display, message):
     pygame.draw.rect(display, pygame.Color(MAIN_COLOR), pygame.Rect(WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
     FONT_SIZE = 20
     font = pygame.font.SysFont('arial', FONT_SIZE)
@@ -70,11 +91,20 @@ def drawCheckmateWindow(display, message):
 
     display.blit(label, label.get_rect(center = display.get_rect().center))
 
+
+def draw_pause_and_restart_buttons(display):
+    pause_image = pygame.image.load("Images/Pause.png")
+    display.blit(pause_image, (570, 330))
+    restart_image = pygame.image.load("Images/Restart.png")
+    display.blit(restart_image, (670, 330))
+
+
 def create_pos(click_pos):
-    row = click_pos[1] // FIELD_SIZE
-    col = click_pos[0] // FIELD_SIZE
+    row = click_pos[1]// FIELD_SIZE
+    col = (click_pos[0] - FIELD_SIZE//2) // FIELD_SIZE
 
     return [row, col]
+
 
 def main():
     pygame.init()
@@ -83,8 +113,28 @@ def main():
 
     program_icon = pygame.image.load('Images/program_icon.png')
     pygame.display.set_icon(program_icon)
-
     pygame.display.update()
+
+    draw_launch_window(display)
+    pygame.display.flip()
+
+    play_clicked = False
+    while not play_clicked:
+        pos = pygame.mouse.get_pos()
+        if pos[0] >= 510 and pos[0] <= 700 and pos[1] >= 300 and pos[1] <= 330:
+            draw_play_button(display, True)
+        else:
+            draw_play_button(display, False)
+        pygame.display.update()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click_pos = pygame.mouse.get_pos()
+
+                    if click_pos[0] >= 700 or click_pos[0] <= 510 or click_pos[1] >= 330 or click_pos[1] <= 300:
+                        continue
+                    play_clicked = True
+
     display.fill(pygame.Color(MAIN_COLOR))
 
     game = Game_Gui()
@@ -105,9 +155,9 @@ def main():
                 if event.button == 1:
                     click_pos = pygame.mouse.get_pos()
 
-                    if click_pos[0] >= 480 or click_pos[1] >= 480:
+                    if click_pos[0] >= 510 or click_pos[1] >= 480:
                         continue
-                
+
                     if len(first_click) == 0:
                         pos = create_pos(click_pos)
                         if is_move:
@@ -144,13 +194,18 @@ def main():
             elif event.type == pygame.QUIT:
                 open = False
 
-        drawBoard(display, chackmate_king_pos)
-        drawFigures(display, game.get_board().get_array(), next_fields_list)
+        draw_board(display, chackmate_king_pos)
+        draw_figures(display, game.get_board().get_array(), next_fields_list)
+        draw_pause_and_restart_buttons(display)
+        pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (0, HEIGHT), 3)
+        pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (WIDTH, 0), 3)
+        pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (WIDTH, HEIGHT), (0, HEIGHT), 3)
+        pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (WIDTH, HEIGHT), (WIDTH, 0), 3)
         pygame.display.flip()
-        
+
 
         if len(chackmate_king_pos):
-            drawCheckmateWindow(display, game.get_winner_message())
+            draw_checkmate_window(display, game.get_winner_message())
             pygame.display.flip()
             pygame.time.delay(5000)
             open = False

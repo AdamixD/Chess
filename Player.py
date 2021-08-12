@@ -8,7 +8,8 @@ class Player:
         team_text = "Black"
         if self._team:
             team_text = "White"
-        name = input(f"Player {team_text}, what is your name?:  ")
+        # name = input(f"Player {team_text}, what is your name?:  ")
+        name = "name"
         self._name = name
 
     def get_name(self):
