@@ -105,6 +105,9 @@ def main():
                 if event.button == 1:
                     click_pos = pygame.mouse.get_pos()
 
+                    if click_pos[0] >= 480 or click_pos[1] >= 480:
+                        continue
+                
                     if len(first_click) == 0:
                         pos = create_pos(click_pos)
                         if is_move:
@@ -144,6 +147,7 @@ def main():
         drawBoard(display, chackmate_king_pos)
         drawFigures(display, game.get_board().get_array(), next_fields_list)
         pygame.display.flip()
+        
 
         if len(chackmate_king_pos):
             drawCheckmateWindow(display, game.get_winner_message())
