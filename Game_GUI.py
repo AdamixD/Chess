@@ -76,6 +76,11 @@ class Game_Gui:
                 return True
         return False
 
+    def check_if_pawn_converting(self, new_position):
+        if self._board.get_array()[new_position[0]][new_position[1]].get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
+            return True
+        return False
+
     def move(self, old_position, new_position):
         next_fields_list = self.get_next_fields_list(old_position)
         castling_fields = self.get_castling_fields(old_position)
@@ -85,5 +90,6 @@ class Game_Gui:
                 if next_field in castling_fields:
                     self._board.castling(next_field)
                     break
+
                 self._board.change_figure_position(old_position, new_position)
                 break
