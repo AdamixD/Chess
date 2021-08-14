@@ -15,6 +15,7 @@ class Game_Gui:
         self._board = Board()
         self._time = 0
         self._winner_message = ""
+        self._chess_notation = []
         # self.create_players()
 
     def create_players(self):
@@ -38,6 +39,12 @@ class Game_Gui:
 
     def set_time(self, new_time):
         self._time = new_time
+    
+    def get_chess_notation(self):
+        return self._chess_notation
+    
+    def set_chess_notation(self, new_chess_notation):
+        self._chess_notation = new_chess_notation
 
     def set_winner_message(self, new_message):
         self._winner_message = new_message
@@ -81,6 +88,34 @@ class Game_Gui:
             return True
         return False
 
+    def create_notation_item(self, old_pos, new_pos):
+        string = ""
+        figure = self._board.get_array()[old_pos[0]][old_pos[1]]
+        if figure.get_name().lower() != "p":
+            string += figure.get_name().upper()
+        string += chr(old_pos[1] + 97)
+        string += str(old_pos[0] + 1)
+
+        new_pos_figure = self._board.get_array()[new_pos[0]][new_pos[1]]
+        if new_pos_figure.get_name() != " ":
+            string += "x"
+        else:
+            string += "-"
+        string += chr(new_pos[1] + 97)
+        string += str(new_pos[0] + 1)
+
+        return string
+
+    def set_check_notation(self):
+        notation = self._chess_notation
+        notation[len(notation)-1] += "+"
+        self._chess_notation = notation
+    
+    def set_checkmate_notation(self):
+        notation = self._chess_notation
+        notation[len(notation)-1] += "#"
+        self._chess_notation = notation
+
     def move(self, old_position, new_position):
         next_fields_list = self.get_next_fields_list(old_position)
         castling_fields = self.get_castling_fields(old_position)
@@ -89,7 +124,11 @@ class Game_Gui:
             if next_field == new_position:
                 if next_field in castling_fields:
                     self._board.castling(next_field)
+                    if new_position[1] < old_position[1]:
+                        self._chess_notation.append("0-0-0")
+                    else:
+                        self._chess_notation.append("0-0")
                     break
-
+                self._chess_notation.append(self.create_notation_item(old_position, new_position))
                 self._board.change_figure_position(old_position, new_position)
                 break

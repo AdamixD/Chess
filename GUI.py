@@ -14,7 +14,7 @@ from Game_GUI import Game_Gui
 from Button import Button
 import pygame
 
-WIDTH, HEIGHT = 820, 510
+WIDTH, HEIGHT = 890, 510
 M_WIDTH, M_HEIGHT = 300, 200
 BUTTON_HEIGHT = 30
 BUTTON_WIDTH = 90
@@ -109,6 +109,27 @@ def draw_pause_and_restart_buttons(display):
     restart_image = pygame.image.load("Images/Restart.png")
     display.blit(restart_image, (670, 330))
 
+def draw_chess_notation(display, notation):
+    S_WIDTH = 8*FIELD_SIZE + 5 + FIELD_SIZE//2
+    pygame.draw.rect(display, pygame.Color("White"), pygame.Rect(S_WIDTH, 120, WIDTH-S_WIDTH - 5, 245))
+    
+    num = 0
+    TEXT_X = S_WIDTH
+    for i in range(0, len(notation) - len(notation) % 2, 2):
+        if num % 16 == 0 and num > 1:
+            TEXT_X += 125
+        font = pygame.font.SysFont('arial', 15)
+        label = font.render(f"{num+1}. {notation[i]} {notation[i+1]}", 0.5, (0, 0, 0))
+        display.blit(label, (TEXT_X, 120 + (num % 16)*15))
+        num += 1
+    
+    if len(notation) % 2 == 1:
+        if num % 16 == 0 and num > 1:
+            TEXT_X += 120
+        font = pygame.font.SysFont('arial', 15)
+        label = font.render(f"{num+1}. {notation[len(notation)-1]}", 0.5, (0, 0, 0))
+        display.blit(label, (TEXT_X, 120 + (num % 16)*15))
+
 def create_figure(name, team, pos):
     if name == "r":
         if team:
@@ -144,11 +165,11 @@ def replacing_pawn(board, pawn):
                     if pawn.get_position()[1] * FIELD_SIZE + FIELD_SIZE//2 < click_pos[0] < (pawn.get_position()[1] + 1) * FIELD_SIZE + FIELD_SIZE//2:
                         if pawn.get_team():
                             list_of_pos = [1, 5]
-                            list_of_figures_names = ["q", "r", "n", "b"]
+                            # list_of_figures_names = ["n", "b", "q", "r"]
                         else:
                             list_of_pos = [5, 9]
                             # I don't know how, but it is working (also line 149)
-                            list_of_figures_names = ["n", "b", "q", "r"]
+                        list_of_figures_names = ["n", "b", "q", "r"]
 
 
                         for i in range(list_of_pos[0], list_of_pos[1]):
@@ -241,7 +262,6 @@ def chess_window(display):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click_pos = pygame.mouse.get_pos()
-
                     if click_pos[0] >= 510 or click_pos[1] >= 480:
                         continue
 
@@ -264,27 +284,36 @@ def chess_window(display):
                             if game.check_if_pawn_converting(new_pos):
                                 draw_pawn_converting_window(display, game.get_board().get_array()[new_pos[0]][new_pos[1]])
                                 replacing_pawn(game.get_board(), game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                                notation = game.get_chess_notation()
+                                string = notation[len(notation) - 1]
+                                new_string = string[0:3] + game.get_board().get_array()[new_pos[0]][new_pos[1]].get_name() + string[3:]
+                                notation[len(notation) - 1] = new_string
+                                game.set_chess_notation(notation)
 
                             check_king_pos = []
 
                             if is_move:
                                 is_move = False
-                                if game.get_board().is_check(False):
-                                    check_king_pos = game.get_board().get_kingB_position()
                                 if game.get_board().is_checkmate(False):
                                     winner = playerW
                                     chackmate_king_pos = game.get_board().get_kingB_position()
                                     game.set_winner_message("White won!!!")
+                                    game.set_checkmate_notation()
                                     break
+                                if game.get_board().is_check(False):
+                                    check_king_pos = game.get_board().get_kingB_position()
+                                    game.set_check_notation()
                             else:
                                 is_move = True
-                                if game.get_board().is_check(True):
-                                    check_king_pos = game.get_board().get_kingW_position()
                                 if game.get_board().is_checkmate(True):
                                     winner = playerB
                                     chackmate_king_pos = game.get_board().get_kingW_position()
                                     game.set_winner_message("Black won!!!")
+                                    game.set_checkmate_notation()
                                     break
+                                if game.get_board().is_check(True):
+                                    check_king_pos = game.get_board().get_kingW_position()
+                                    game.set_check_notation()
                         first_click = []
                         next_fields_list = []
 
@@ -293,7 +322,8 @@ def chess_window(display):
 
         draw_board(display, chackmate_king_pos, check_king_pos)
         draw_figures(display, game.get_board().get_array(), next_fields_list)
-        draw_pause_and_restart_buttons(display)
+        draw_chess_notation(display, game.get_chess_notation())
+        # draw_pause_and_restart_buttons(display)
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (0, HEIGHT), 3)
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (WIDTH, 0), 3)
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (WIDTH, HEIGHT), (0, HEIGHT), 3)
@@ -323,7 +353,7 @@ def main():
     draw_dialog_window(display)
     pygame.display.flip()
 
-    pygame.time.delay(5000)
+    pygame.time.delay(1000)
 
     ####################################
 

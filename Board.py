@@ -22,7 +22,7 @@ class Board:
                 row.append(empty_field)
             self._array.append(row)
 
-        pawnW1 = Pawn("P", [6, 0], "Images/Pawn_W.png", True)
+        pawnW1 = Pawn("P", [1, 0], "Images/Pawn_W.png", True)
         pawnW2 = Pawn("P", [6, 1], "Images/Pawn_W.png", True)
         pawnW3 = Pawn("P", [6, 2], "Images/Pawn_W.png", True)
         pawnW4 = Pawn("P", [6, 3], "Images/Pawn_W.png", True)
@@ -38,7 +38,7 @@ class Board:
         pawnB5 = Pawn("p", [1, 4], "Images/Pawn_B.png", False)
         pawnB6 = Pawn("p", [1, 5], "Images/Pawn_B.png", False)
         pawnB7 = Pawn("p", [1, 6], "Images/Pawn_B.png", False)
-        pawnB8 = Pawn("p", [1, 7], "Images/Pawn_B.png", False)
+        pawnB8 = Pawn("p", [6, 7], "Images/Pawn_B.png", False)
 
         kingW = King("K", [7, 4], "Images/King_W.png", True)
         kingB = King("k", [0, 4], "Images/King_B.png", False)
@@ -68,9 +68,9 @@ class Board:
         self.addFigure(pawnW5)
         self.addFigure(pawnW6)
         self.addFigure(pawnW7)
-        self.addFigure(pawnW8)
+        # self.addFigure(pawnW8)
 
-        self.addFigure(pawnB1)
+        # self.addFigure(pawnB1)
         self.addFigure(pawnB2)
         self.addFigure(pawnB3)
         self.addFigure(pawnB4)
@@ -88,8 +88,8 @@ class Board:
         self.addFigure(bishopB2)
 
         self.addFigure(rookW1)
-        self.addFigure(rookB1)
-        self.addFigure(rookW2)
+        # self.addFigure(rookB1)
+        # self.addFigure(rookW2)
         self.addFigure(rookB2)
 
         self.addFigure(knightW1)
