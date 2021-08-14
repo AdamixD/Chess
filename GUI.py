@@ -11,6 +11,7 @@ from Board import Board
 from Player import Player
 from time import time
 from Game_GUI import Game_Gui
+from Button import Button
 import pygame
 
 WIDTH, HEIGHT = 820, 510
@@ -29,24 +30,14 @@ GREEN_CIRCLE = (106, 135, 77)
 MAIN_COLOR = (55, 55, 55)
 CONTOUR_COLOR = (55, 45, 45)
 
-def draw_play_button(display, is_clicked):
-    if is_clicked:
-        play_image = pygame.image.load("Images/Play_yes.png")
-        display.blit(play_image, (510, 300))
-    else:
-        play_image = pygame.image.load("Images/Play_no.png")
-        display.blit(play_image, (510, 300))
-
+# Draw ################################
 def draw_launch_background(display):
     background_image = pygame.image.load("Images/background.jpg")
     logo_image = pygame.image.load("Images/new_logo.png")
     display.blit(background_image, (0, 0))
     display.blit(logo_image, (500, 50))
 
-def draw_launch_window(display):
-    draw_launch_background(display)
-    draw_play_button(display, False)
-
+# TODO
 def draw_dialog_window(display):
     window_image = pygame.image.load("Images/dialog_win.png")
     display.blit(window_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 50))
@@ -58,7 +49,6 @@ def draw_dialog_window(display):
     display.blit(ten_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 190))
     unlimited_image = pygame.image.load("Images/unlimited_no.png")
     display.blit(unlimited_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 225))
-
 
 def draw_board(display, chackmate_king_pos, check_king_pos):
     for i in range(8):
@@ -74,11 +64,12 @@ def draw_board(display, chackmate_king_pos, check_king_pos):
                 font = pygame.font.SysFont('arial', 15)
                 label = font.render(chr(97+j), 0.5, (206, 206, 206))
                 display.blit(label, (45 + FIELD_SIZE//2 + FIELD_SIZE*j, 480))
-    if len(chackmate_king_pos):
-        pygame.draw.rect(display, pygame.Color("Red"), pygame.Rect(chackmate_king_pos[1]*FIELD_SIZE + FIELD_SIZE//2, chackmate_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
 
     if len(check_king_pos):
         pygame.draw.rect(display, pygame.Color("Orange"), pygame.Rect(check_king_pos[1]*FIELD_SIZE + FIELD_SIZE//2, check_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
+    
+    if len(chackmate_king_pos):
+        pygame.draw.rect(display, pygame.Color("Red"), pygame.Rect(chackmate_king_pos[1]*FIELD_SIZE + FIELD_SIZE//2, chackmate_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
 
 def draw_figures(display, array, next_fields_list=[]):
     for field in next_fields_list:
@@ -102,7 +93,7 @@ def draw_figures(display, array, next_fields_list=[]):
                 image = pygame.image.load(figure.get_picture())
                 display.blit(image, (i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE))
 
-
+# TODO put messege in the center 
 def draw_checkmate_window(display, message):
     pygame.draw.rect(display, pygame.Color(MAIN_COLOR), pygame.Rect(WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
     FONT_SIZE = 20
@@ -111,7 +102,7 @@ def draw_checkmate_window(display, message):
 
     display.blit(label, label.get_rect(center = display.get_rect().center))
 
-
+# TODO rewrite this function using class Button
 def draw_pause_and_restart_buttons(display):
     pause_image = pygame.image.load("Images/Pause.png")
     display.blit(pause_image, (570, 330))
@@ -142,7 +133,6 @@ def create_figure(name, team, pos):
 
     return new_figure
 
-
 def replacing_pawn(board, pawn):
     is_choosen = False
     while not is_choosen:
@@ -170,7 +160,7 @@ def replacing_pawn(board, pawn):
                                 board.addFigure(new_figure)
                                 is_choosen = True
                                 break
-
+                                
 def draw_pawn_converting_window(display, pawn):
     if pawn.get_team():
         pygame.draw.rect(display, pygame.Color(MAIN_COLOR), pygame.Rect(pawn.get_position()[1] * FIELD_SIZE + FIELD_SIZE//2 , 0 * FIELD_SIZE, FIELD_SIZE, 4 * FIELD_SIZE))
@@ -215,44 +205,22 @@ def create_pos(click_pos):
 
     return [row, col]
 
-
-def main():
-    pygame.init()
-    pygame.display.set_caption("Chess")
-    display = pygame.display.set_mode((WIDTH, HEIGHT))
-
-    program_icon = pygame.image.load('Images/program_icon.png')
-    pygame.display.set_icon(program_icon)
-    pygame.display.update()
-
-    draw_launch_window(display)
-    pygame.display.flip()
-
+def lauch_window(display):
+    draw_launch_background(display)
     play_clicked = False
+    play_button = Button("Images/Play_no.png", "Images/Play_yes.png", [510, 300], [190, 30])
+
     while not play_clicked:
-        pos = pygame.mouse.get_pos()
-        if pos[0] >= 510 and pos[0] <= 700 and pos[1] >= 300 and pos[1] <= 330:
-            draw_play_button(display, True)
-        else:
-            draw_play_button(display, False)
-        pygame.display.update()
+        play_button.draw(display)
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    click_pos = pygame.mouse.get_pos()
+                    play_clicked = play_button.check_click()
+            elif event.type == pygame.QUIT:
+                play_clicked = True
 
-                    if click_pos[0] >= 700 or click_pos[0] <= 510 or click_pos[1] >= 330 or click_pos[1] <= 300:
-                        continue
-                    play_clicked = True
-
-    draw_launch_background(display)
-    pygame.display.update()
-    draw_dialog_window(display)
-    pygame.display.flip()
-    pygame.time.delay(30000)
-
+def chess_window(display):
     display.fill(pygame.Color(MAIN_COLOR))
-
 
     game = Game_Gui()
     open = True
@@ -339,6 +307,27 @@ def main():
             pygame.time.delay(5000)
             open = False
 
+def main():
+    pygame.init()
+    pygame.display.set_caption("Chess")
+    display = pygame.display.set_mode((WIDTH, HEIGHT))
+
+    program_icon = pygame.image.load('Images/program_icon.png')
+    pygame.display.set_icon(program_icon)
+
+    lauch_window(display)
+
+    # TODO create time window
+
+    draw_launch_background(display)
+    draw_dialog_window(display)
+    pygame.display.flip()
+
+    pygame.time.delay(5000)
+
+    ####################################
+
+    chess_window(display)
 
     pygame.quit()
 
