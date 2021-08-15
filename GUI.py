@@ -1,3 +1,4 @@
+from History.file_functions import write_to_file
 from typing import Counter
 from Figures.Figure import Figure
 from Figures.Knight import Knight
@@ -12,6 +13,8 @@ from Player import Player
 from time import time
 from Game_GUI import Game_Gui
 from Button import Button
+from History.file_functions import write_to_file
+import Time
 import pygame
 
 WIDTH, HEIGHT = 890, 510
@@ -334,6 +337,7 @@ def chess_window(display):
         if len(chackmate_king_pos):
             draw_checkmate_window(display, game.get_winner_message())
             pygame.display.flip()
+            write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)
             open = False
 
