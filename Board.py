@@ -172,17 +172,17 @@ class Board:
                             return True
         return False
 
-    def is_checkmate(self, team):
+    def check_if_figures_have_possible_field(self, team):
         if team:
             king_position = self._kingW_position
         else:
             king_position = self._kingB_position
-
-
+        
         #check if king has fields to go
         kings_fields_list = self._array[king_position[0]][king_position[1]].check_next_field(self)
+
         if len(kings_fields_list):
-            return False
+            return True
 
         for i in range(8):
             for j in range(8):
@@ -190,7 +190,86 @@ class Board:
                 if figure.get_name() != " " and figure.get_team() == team:
                     next_field_list = figure.check_next_field(self)
                     if len(next_field_list):
-                        return False
-        return True
+                        return True
+        return False
+
+    def is_checkmate(self, team):
+        if self.is_check(team):
+            if not self.check_if_figures_have_possible_field(team):
+                return True
+        return False
+
+    def check_stalemate(self):
+        if not self.is_check(True) and not self.is_check(False):
+            if not self.check_if_figures_have_possible_field(True) or not self.check_if_figures_have_possible_field(False):
+                return True
+        return False
+    
+    def check_dead_position(self):
+        chess_dict = {
+            "k" : 0,
+            "n" : 1,
+            "b" : 2,
+        }
+
+        # 0. King, 1. Knightm 2. White-bishop, 3. Black-bishop
+        teams = [[0, 0, 0, 0], [0, 0, 0, 0]]
+        for i in range(8):
+            for j in range(8):
+                figure = self._array[i][j]
+                figure_name = figure.get_name().lower()
+                if figure_name != "b" and figure_name != "n" and figure_name != "k" and figure_name != " ":
+                    return False
+                elif figure_name != " ":
+                    col = 1
+                    if figure.get_team():
+                        col = 0
+
+                    if figure_name == "b":
+                        pos = figure.get_position()
+                        delta = (pos[0] + pos[1]) % 2
+                        teams[col][2 + delta] += 1
+                    else:
+                        teams[col][chess_dict[figure_name]] += 1
+        combinations = [[[1, 1, 0, 0], [1, 0, 0, 0]], [[1, 0, 0, 0], [1, 1, 0, 0]], [[1, 0, 0, 0], [1, 0, 0, 0]], [[1, 0, 1, 0], [1, 0, 1, 0]], [[1, 0, 0, 1], [1, 0, 0, 1]], [[1, 0, 1, 0], [1, 0, 0, 0]], [[1, 0, 0, 1], [1, 0, 0, 0]], [[1, 0, 0, 0], [1, 0, 1, 0]], [[1, 0, 0, 0], [1, 0, 0, 1]]]
+        for combination in combinations:
+            if teams == combination:
+                return True
+        return False
+
+    def check_threefold_repetition(self, history):
+        if len(history) > 4:
+            last = ""
+            count = 0
+            for i in range(len(history)-1, -1, -4):
+                if last != history[i]:
+                    last = history[i]
+                    count = 1
+                else:
+                    count += 1
+                
+                if count == 3:
+                    return True
+        return False
+    
+    def check_if_draw(self, history):
+        #Stalemate
+        if self.check_stalemate():
+            print("Stalemate")
+            return True
+
+        #Dead Position
+        if self.check_dead_position():
+            print("Dead position")
+            return True
+                    
+        #TODO Mutual Agreement
+        #Threefold Repetition
+        if self.check_threefold_repetition(history):
+            print("3")
+            return True
+        
+        return False
+        #TODO 50-Move Rule
 
 

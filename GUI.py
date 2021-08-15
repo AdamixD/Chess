@@ -317,6 +317,7 @@ def chess_window(display):
                                 if game.get_board().is_check(True):
                                     check_king_pos = game.get_board().get_kingW_position()
                                     game.set_check_notation()
+
                         first_click = []
                         next_fields_list = []
 
@@ -336,6 +337,12 @@ def chess_window(display):
 
         if len(chackmate_king_pos):
             draw_checkmate_window(display, game.get_winner_message())
+            pygame.display.flip()
+            write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
+            pygame.time.delay(5000)
+            open = False
+        if game.get_board().check_if_draw(game.get_chess_notation()):
+            draw_checkmate_window(display, "Draw!!!")
             pygame.display.flip()
             write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)
