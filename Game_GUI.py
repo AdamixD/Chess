@@ -39,10 +39,10 @@ class Game_Gui:
 
     def set_time(self, new_time):
         self._time = new_time
-    
+
     def get_chess_notation(self):
         return self._chess_notation
-    
+
     def set_chess_notation(self, new_chess_notation):
         self._chess_notation = new_chess_notation
 
@@ -110,7 +110,7 @@ class Game_Gui:
         notation = self._chess_notation
         notation[len(notation)-1] += "+"
         self._chess_notation = notation
-    
+
     def set_checkmate_notation(self):
         notation = self._chess_notation
         notation[len(notation)-1] += "#"
