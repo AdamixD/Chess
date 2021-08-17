@@ -185,6 +185,16 @@ def draw_time_box(display, player, position, path):
     display.blit(box_image, (position[0], position[1]))
     display.blit(label, (position[0] + 12, position[1] + 5))
 
+    image_w = pygame.image.load("Images/w.png")
+    image_w1 = pygame.image.load("Images/w1.png")
+    image_w2 = pygame.image.load("Images/w2.png")
+
+    display.blit(image_w, (800, 480))
+    display.blit(image_w1, (830, 480))
+    display.blit(image_w2, (860, 480))
+
+
+
 
 def draw_time_boxes(display, playerW, playerB):
     draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 7*FIELD_SIZE + FIELD_SIZE//2], "Images/white_time.png")
