@@ -129,6 +129,7 @@ class Game_Gui:
                         self._chess_notation.append("0-0-0")
                     else:
                         self._chess_notation.append("0-0")
+                    play_sound("Sounds/Castling.mp3", 0.125)
                     break
                 if self._board.get_array()[next_field[0]][next_field[1]].get_name() != " ":
                     play_sound("Sounds/Beat.mp3")

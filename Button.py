@@ -1,4 +1,5 @@
 import pygame
+from SoundsPlayer import play_sound
 
 class Button:
     def __init__(self, before_img, after_img, pos, size):
@@ -6,6 +7,7 @@ class Button:
         self._after_img = after_img
         self._pos = pos
         self._size = size
+        self._sound = "Sounds/Click2.mp3"
     
     def get_size(self):
         return self._size
@@ -34,4 +36,5 @@ class Button:
 
         if click_pos[0] <= self._pos[0] or click_pos[0] >= (self._pos[0] + self._size[0]) or click_pos[1] <= self._pos[1] or click_pos[1] >= (self._pos[1] + self._size[1]):
             return False
+        play_sound(self._sound, 0.22)
         return True
