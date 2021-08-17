@@ -9,6 +9,7 @@ from Figures.EmptyField import EmptyField
 from Board import Board
 from Player import Player
 from time import time
+from SoundsPlayer import play_sound
 
 class Game_Gui:
     def __init__(self):
@@ -129,6 +130,10 @@ class Game_Gui:
                     else:
                         self._chess_notation.append("0-0")
                     break
+                if self._board.get_array()[next_field[0]][next_field[1]].get_name() != " ":
+                    play_sound("Sounds/Beat.mp3")
+                else:
+                    play_sound("Sounds/Moving.mp3")
                 self._chess_notation.append(self.create_notation_item(old_position, new_position))
                 self._board.change_figure_position(old_position, new_position)
                 break
