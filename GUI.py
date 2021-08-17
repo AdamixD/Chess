@@ -1,3 +1,4 @@
+from pygame import color
 from History.file_functions import write_to_file
 from typing import Counter
 from Figures.Figure import Figure
@@ -30,10 +31,12 @@ FIELD_SIZE = 60
 
 BASIC_GREEN = (119, 149, 86)
 BASIC_WHITE = (235, 236, 208)
+CHESS_WHITE = (236 ,236, 236)
 WHITE_CIRCLE = (214, 214, 189)
 GREEN_CIRCLE = (106, 135, 77)
-MAIN_COLOR = (55, 55, 55)
+MAIN_COLOR = (44, 44, 44)
 CONTOUR_COLOR = (55, 45, 45)
+BROWN_WIN_COLOR = (36, 36, 36)
 
 # Draw ################################
 def draw_launch_background(display):
@@ -84,7 +87,7 @@ def dialog_window(display):
 
 def draw_board(display, chackmate_king_pos, check_king_pos):
     for i in range(8):
-        font = pygame.font.SysFont('arial', 15)
+        font = pygame.font.Font('trebuc.ttf', 15)
         label = font.render(str(i+1), 0.5, (206, 206, 206))
         display.blit(label, (15, 10 + FIELD_SIZE*i))
         for j in range(8):
@@ -93,7 +96,7 @@ def draw_board(display, chackmate_king_pos, check_king_pos):
             else:
                 pygame.draw.rect(display, pygame.Color(BASIC_GREEN), pygame.Rect(i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
             if i == 7:
-                font = pygame.font.SysFont('arial', 15)
+                font = pygame.font.Font('trebuc.ttf', 15)
                 label = font.render(chr(97+j), 0.5, (206, 206, 206))
                 display.blit(label, (45 + FIELD_SIZE//2 + FIELD_SIZE*j, 480))
 
@@ -131,7 +134,7 @@ def draw_figures(display, array, next_fields_list=[]):
 def draw_end_game_window(display, message):
     pygame.draw.rect(display, pygame.Color(MAIN_COLOR), pygame.Rect(WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
     FONT_SIZE = 20
-    font = pygame.font.SysFont('arial', FONT_SIZE)
+    font = pygame.font.Font('trebuc.ttf', FONT_SIZE)
     label = font.render(message, 0.5, (206, 206, 206))
 
     display.blit(label, label.get_rect(center = display.get_rect().center))
@@ -147,40 +150,45 @@ def draw_pause_and_restart_buttons(display):
 
 def draw_chess_notation(display, notation):
     S_WIDTH = 8*FIELD_SIZE + 5 + FIELD_SIZE//2
-    pygame.draw.rect(display, pygame.Color("White"), pygame.Rect(S_WIDTH, 120, WIDTH-S_WIDTH - 5, 241))
+    pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(S_WIDTH, 120, WIDTH-S_WIDTH - 5, 241))
 
     num = 0
     TEXT_X = S_WIDTH
     for i in range(0, len(notation) - len(notation) % 2, 2):
         if num % 16 == 0 and num > 1:
             TEXT_X += 125
-        font = pygame.font.SysFont('arial', 15)
-        label = font.render(f"{num+1}. {notation[i]} {notation[i+1]}", 0.5, (0, 0, 0))
+        font = pygame.font.Font('trebuc.ttf', 15)
+        label = font.render(f"{num+1}. {notation[i]} {notation[i+1]}", 0.5, CHESS_WHITE)
         display.blit(label, (TEXT_X, 120 + (num % 16)*15))
         num += 1
 
     if len(notation) % 2 == 1:
         if num % 16 == 0 and num > 1:
             TEXT_X += 120
-        font = pygame.font.SysFont('arial', 15)
-        label = font.render(f"{num+1}. {notation[len(notation)-1]}", 0.5, (0, 0, 0))
+        font = pygame.font.Font('trebuc.ttf', 15)
+        label = font.render(f"{num+1}. {notation[len(notation)-1]}", 0.5, CHESS_WHITE)
         display.blit(label, (TEXT_X, 120 + (num % 16)*15))
 
 
-def draw_time_box(display, player, position):
+def draw_time_box(display, player, position, path):
+    box_image = pygame.image.load(path)
     time = math.floor(player.get_time())
     text = f" -- : --"
     if time != 1000:
         text = f"{time // 60} : {time % 60}"
-    font = pygame.font.SysFont('arial', 15)
-    label = font.render(text, 0.5, (0, 0, 0))
-    pygame.draw.rect(display, pygame.Color("White"), pygame.Rect(position[0], position[1], 60, 30))
-    display.blit(label, (position[0] + 15, position[1] + 5))
+    font = pygame.font.Font('trebuc.ttf', 15)
+    color = MAIN_COLOR
+    if not player.get_team():
+        color = CHESS_WHITE
+    label = font.render(text, 0.5, color)
+
+    display.blit(box_image, (position[0], position[1]))
+    display.blit(label, (position[0] + 12, position[1] + 5))
 
 
 def draw_time_boxes(display, playerW, playerB):
-    draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 7*FIELD_SIZE + FIELD_SIZE//2])
-    draw_time_box(display, playerB, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 0])
+    draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 7*FIELD_SIZE + FIELD_SIZE//2], "Images/white_time.png")
+    draw_time_box(display, playerB, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 0], "Images/black_time.png")
 
 
 def create_figure(name, team, pos):
@@ -286,7 +294,7 @@ def create_pos(click_pos):
 def lauch_window(display):
     draw_launch_background(display)
     play_clicked = False
-    play_button = Button("Images/Play_no.png", "Images/Play_yes.png", [560, 300], [190, 30])
+    play_button = Button("Images/Play_no.png", "Images/Play_yes.png", [562, 300], [190, 30])
 
     while not play_clicked:
         play_button.draw(display)
