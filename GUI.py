@@ -15,6 +15,7 @@ import math
 from Game_GUI import Game_Gui
 from Button import Button
 from History.file_functions import write_to_file
+from SoundsPlayer import play_sound
 import Time
 import pygame
 
@@ -171,7 +172,7 @@ def draw_time_box(display, player, position):
     time = math.floor(player.get_time())
     text = f" -- : --"
     if time != 1000:
-        text = f"{time // 60} : {time % 60}"
+        text = f"{time // 60:02} : {time % 60:02}"
     font = pygame.font.SysFont('arial', 15)
     label = font.render(text, 0.5, (0, 0, 0))
     pygame.draw.rect(display, pygame.Color("White"), pygame.Rect(position[0], position[1], 60, 30))
@@ -382,10 +383,12 @@ def chess_window(display, game_time):
                                     chackmate_king_pos = game.get_board().get_kingB_position()
                                     game.set_winner_message("White won!!!")
                                     game.set_checkmate_notation()
+                                    play_sound("Sounds/Checkmate.mp3")
                                     break
                                 if game.get_board().is_check(False):
                                     check_king_pos = game.get_board().get_kingB_position()
                                     game.set_check_notation()
+                                    play_sound("Sounds/Check.mp3")
                             else:
                                 is_move = True
                                 if game.get_board().is_checkmate(True):
@@ -393,10 +396,12 @@ def chess_window(display, game_time):
                                     chackmate_king_pos = game.get_board().get_kingW_position()
                                     game.set_winner_message("Black won!!!")
                                     game.set_checkmate_notation()
+                                    play_sound("Sounds/Checkmate.mp3")
                                     break
                                 if game.get_board().is_check(True):
                                     check_king_pos = game.get_board().get_kingW_position()
                                     game.set_check_notation()
+                                    play_sound("Sounds/Check.mp3")
 
                         first_click = []
                         next_fields_list = []
@@ -445,10 +450,6 @@ def main():
     draw_launch_background(display)
     game_time = dialog_window(display)
     pygame.display.flip()
-
-    # pygame.time.delay(1000)
-
-    ####################################
 
     chess_window(display, game_time)
 
