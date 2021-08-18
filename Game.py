@@ -17,8 +17,8 @@ class Game:
         self.create_players()
 
     def create_players(self):
-        self._playerW = Player(True)
-        self._playerB = Player(False)
+        self._playerW = Player(True, 1)
+        self._playerB = Player(False, 1)
 
     def get_board(self):
         return self._board
@@ -47,7 +47,7 @@ class Game:
 
         is_ok = False
         while not is_ok:
-            print(f"{player.get_name()} choose figure: ")
+            print(f"1 choose figure: ")
             old_x, old_y = list(map(int, input().split()))
 
             figure = self._board.get_array()[old_x][old_y]
@@ -68,13 +68,13 @@ class Game:
             for new_field in castling_fields:
                 next_fields_list.append(new_field)
 
-        print(f"{player.get_name()} you can move this figure to: {next_fields_list}")
+        print(f"1 you can move this figure to: {next_fields_list}")
 
         is_ok = False
         new_figure = None
 
         while not is_ok:
-            print(f"{player.get_name()} choose field to move on: ")
+            print(f"1 choose field to move on: ")
             new_position = list(map(int, input().split()))
             new_x, new_y = new_position
 
@@ -84,9 +84,15 @@ class Game:
                     if next_field in castling_fields:
                         self._board.castling(next_field)
                         break
-
+                    # if figure.get_name().lower() == "p":
+                    #     delta = abs(new_position[0] - figure.get_position()[0])
+                    #     if  delta == 2:
+                    #         figure.set_two_step_move(True)
+                    #     else:
+                    #         figure.set_two_step_move(False)
+                    
                     if figure.get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
-                        new_figure_name = input(f"{player.get_name()}, your pawn will convert to (r, n, b, q): ")
+                        new_figure_name = input(f"1, your pawn will convert to (r, n, b, q): ")
 
                         if new_figure_name == "r":
                             if player.get_team():

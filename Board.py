@@ -141,6 +141,17 @@ class Board:
 
         if self._array[old_x][old_y].get_name().lower() == "p":
             self._array[old_x][old_y].set_is_moved()
+            delta = abs(new_position[0] - old_position[0])
+            if  delta == 2:
+                self._array[old_x][old_y].set_two_step_move(True)
+            else:
+                self._array[old_x][old_y].set_two_step_move(False)
+
+        if self._array[old_x][old_y].get_name().lower() == "p":
+            if self._array[old_x][old_y].get_found_en_passant():
+                for en_passant_pos in self._array[old_x][old_y].get_en_passant():
+                    if new_position[1] == en_passant_pos[1]:
+                        self._array[en_passant_pos[0]][en_passant_pos[1]] = EmptyField([en_passant_pos[0], en_passant_pos[1]], " ")
 
         self._array[old_x][old_y].set_position([new_x, new_y])
         self._array[new_x][new_y] = self._array[old_x][old_y]
