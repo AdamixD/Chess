@@ -45,8 +45,8 @@ class Pawn(Figure):
 
         for i in range(number_of_steps):
             new_x += step
-            if i == 1 and len(array) == 0:
-                break
+            # if i == 1 and len(array) == 0:
+            #     break
             if new_x >= 0 and new_x < 8:
                 if board_array[new_x][y].get_name() == " ":
                     self.next_field_appending(array, use_if_check, board, [new_x, y])
