@@ -13,6 +13,7 @@ from Board import Board
 from Player import Player
 import time
 import math
+import copy
 from Game_GUI import Game_Gui
 from Button import Button
 from History.file_functions import write_to_file
@@ -21,14 +22,16 @@ import Time
 import pygame
 
 
-WIDTH, HEIGHT = 890, 510
+WIDTH, HEIGHT = 920, 510
 M_WIDTH, M_HEIGHT = 300, 200
 BUTTON_HEIGHT = 30
 BUTTON_WIDTH = 90
 DIALOG_WIN_HEIGHT = 250
 DIALOG_WIN_WIDTH = 200
 
+
 FIELD_SIZE = 60
+S_WIDTH = 8*FIELD_SIZE + FIELD_SIZE//2 + 20
 
 BASIC_GREEN = (119, 149, 86)
 BASIC_WHITE = (235, 236, 208)
@@ -150,8 +153,7 @@ def draw_pause_and_restart_buttons(display):
 
 
 def draw_chess_notation(display, notation):
-    S_WIDTH = 8*FIELD_SIZE + 5 + FIELD_SIZE//2
-    pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(S_WIDTH, 120, WIDTH-S_WIDTH - 5, 241))
+    pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(S_WIDTH, 90, WIDTH-S_WIDTH - 20, 242))
 
     num = 0
     TEXT_X = S_WIDTH
@@ -160,7 +162,7 @@ def draw_chess_notation(display, notation):
             TEXT_X += 125
         font = pygame.font.Font('trebuc.ttf', 15)
         label = font.render(f"{num+1}. {notation[i]} {notation[i+1]}", 0.5, CHESS_WHITE)
-        display.blit(label, (TEXT_X, 120 + (num % 16)*15))
+        display.blit(label, (TEXT_X, 90 + (num % 16)*15))
         num += 1
 
     if len(notation) % 2 == 1:
@@ -168,7 +170,7 @@ def draw_chess_notation(display, notation):
             TEXT_X += 120
         font = pygame.font.Font('trebuc.ttf', 15)
         label = font.render(f"{num+1}. {notation[len(notation)-1]}", 0.5, CHESS_WHITE)
-        display.blit(label, (TEXT_X, 120 + (num % 16)*15))
+        display.blit(label, (TEXT_X, 90 + (num % 16)*15))
 
 
 def draw_time_box(display, player, position, path):
@@ -186,19 +188,43 @@ def draw_time_box(display, player, position, path):
     display.blit(box_image, (position[0], position[1]))
     display.blit(label, (position[0] + 5, position[1] + 5))
 
-    image_w = pygame.image.load("Images/w.png")
-    image_w1 = pygame.image.load("Images/w1.png")
-    image_w2 = pygame.image.load("Images/w2.png")
-
-    display.blit(image_w, (800, 480))
-    display.blit(image_w1, (830, 480))
-    display.blit(image_w2, (860, 480))
-
-
 
 def draw_time_boxes(display, playerW, playerB):
-    draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 7*FIELD_SIZE + FIELD_SIZE//2], "Images/white_time.png")
-    draw_time_box(display, playerB, [8*FIELD_SIZE + FIELD_SIZE//2 + 5, 0], "Images/black_time.png")
+    draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 20, 7*FIELD_SIZE + FIELD_SIZE//2], "Images/white_time.png")
+    draw_time_box(display, playerB, [8*FIELD_SIZE + FIELD_SIZE//2 + 20, 0], "Images/black_time.png")
+
+
+def draw_broken_figure_window(display, team, pos, game):
+    pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(pos[0], pos[1], 370, 50))
+    index = 0
+    if team:
+        for figure in game.get_broken_figures_W():
+            path = figure.get_picture()
+            l = len(path)
+            modified_path = path[:l-4] + "_m.png"
+            image = pygame.image.load(modified_path)
+            if index <= 13:
+                display.blit(image, (S_WIDTH + (index % 14)*25, 35))
+            else:
+                display.blit(image, (S_WIDTH + (index % 14)*25, 60))
+            index += 1
+
+    else:
+        for figure in game.get_broken_figures_B():
+            path = figure.get_picture()
+            l = len(path)
+            modified_path = path[:l-4] + "_m.png"
+            image = pygame.image.load(modified_path)
+            if index <= 13:
+                display.blit(image, (S_WIDTH + (index % 14)*25, 390))
+            else:
+                display.blit(image, (S_WIDTH + (index % 14)*25, 415))
+            index += 1
+
+
+def draw_broken_figures_windows(display, game):
+    draw_broken_figure_window(display, True, [S_WIDTH, 35], game)
+    draw_broken_figure_window(display, False, [S_WIDTH, 390], game)
 
 
 def create_figure(name, team, pos):
@@ -381,6 +407,9 @@ def chess_window(display, game_time):
                         new_pos = create_pos(click_pos)
 
                         if game.check_move(old_pos, new_pos):
+                            figure = copy.deepcopy(game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                            if figure.get_name() != " ":
+                                game.add_to_broken_figures(figure)
                             game.move(old_pos, new_pos)
                             if game.check_if_pawn_converting(new_pos):
                                 draw_pawn_converting_window(display, game.get_board().get_array()[new_pos[0]][new_pos[1]])
@@ -428,6 +457,7 @@ def chess_window(display, game_time):
 
         draw_board(display, chackmate_king_pos, check_king_pos)
         draw_figures(display, game.get_board().get_array(), next_fields_list)
+        draw_broken_figures_windows(display, game)
         draw_chess_notation(display, game.get_chess_notation())
         # draw_pause_and_restart_buttons(display)
 

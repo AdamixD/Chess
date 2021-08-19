@@ -17,6 +17,8 @@ class Game_Gui:
         self._time = 0
         self._winner_message = ""
         self._chess_notation = []
+        self._broken_figures_W = []
+        self._broken_figures_B = []
         # self.create_players()
 
     def create_players(self):
@@ -38,11 +40,17 @@ class Game_Gui:
     def get_playerB(self):
         return self._playerB
 
-    def set_time(self, new_time):
-        self._time = new_time
-
     def get_chess_notation(self):
         return self._chess_notation
+
+    def get_broken_figures_W(self):
+        return self._broken_figures_W
+
+    def get_broken_figures_B(self):
+        return self._broken_figures_B
+
+    def set_time(self, new_time):
+        self._time = new_time
 
     def set_chess_notation(self, new_chess_notation):
         self._chess_notation = new_chess_notation
@@ -116,6 +124,12 @@ class Game_Gui:
         notation = self._chess_notation
         notation[len(notation)-1] += "#"
         self._chess_notation = notation
+
+    def add_to_broken_figures(self, figure):
+        if figure.get_team():
+            self._broken_figures_W.append(figure)
+        else:
+            self._broken_figures_B.append(figure)
 
     def move(self, old_position, new_position):
         next_fields_list = self.get_next_fields_list(old_position)
