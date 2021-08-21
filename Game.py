@@ -90,7 +90,7 @@ class Game:
                     #         figure.set_two_step_move(True)
                     #     else:
                     #         figure.set_two_step_move(False)
-                    
+
                     if figure.get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
                         new_figure_name = input(f"1, your pawn will convert to (r, n, b, q): ")
 

@@ -135,22 +135,30 @@ def draw_figures(display, array, next_fields_list=[]):
 
 
 # TODO put messege in the center
-def draw_end_game_window(display, message):
-    pygame.draw.rect(display, pygame.Color(MAIN_COLOR), pygame.Rect(WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
-    FONT_SIZE = 20
-    font = pygame.font.Font('trebuc.ttf', FONT_SIZE)
-    label = font.render(message, 0.5, (206, 206, 206))
+def draw_end_game_window(display, result):
+    if result == 0:
+        image = pygame.image.load("Images/black_won.png")
+    elif result == 1:
+        image = pygame.image.load("Images/white_won.png")
+    else:
+        image = pygame.image.load("Images/draw.png")
 
-    display.blit(label, label.get_rect(center = display.get_rect().center))
+    display.blit(image, (WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
+
 
 
 # TODO rewrite this function using class Button
-def draw_pause_and_restart_buttons(display):
-    pause_image = pygame.image.load("Images/Pause.png")
-    display.blit(pause_image, (570, 330))
-    restart_image = pygame.image.load("Images/Restart.png")
-    display.blit(restart_image, (670, 330))
+def draw_pause_button(display):
+    pause_button = Button("Images/Pause_no.png", "Images/Pause_yes.png", [725, 345], [130, 30])
+    pause_button.draw(display)
 
+def draw_new_game_button(display):
+    new_game_button = Button("Images/new_game_no.png", "Images/new_game_yes.png", [575, 345], [130, 30])
+    new_game_button.draw(display)
+
+def draw_pause_and_new_game_buttons(display):
+    draw_pause_button(display)
+    draw_new_game_button(display)
 
 def draw_chess_notation(display, notation):
     pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(S_WIDTH, 90, WIDTH-S_WIDTH - 20, 242))
@@ -360,27 +368,32 @@ def chess_window(display, game_time):
     first_click = []
     next_fields_list = []
     start_time = time.time()
+    pause_time = 0
     while open:
         if game_time == 1000:
             pass # unlimited
         elif is_move:
-            player_time = playerW.get_time() - (time.time() - start_time)
+            player_time = playerW.get_time() - (time.time() - start_time) + pause_time
             playerW.set_time(player_time)
         else:
-            player_time = playerB.get_time() - (time.time() - start_time)
+            player_time = playerB.get_time() - (time.time() - start_time) + pause_time
             playerB.set_time(player_time)
+
+        pause_time = 0
 
         draw_time_boxes(display, playerW, playerB)
         start_time = time.time()
         if playerW.get_time() <= 0 or playerB.get_time() <= 0:
             if playerB.get_time() <= 0:
                 playerB.set_time(0)
-                game.set_winner_message("White won!!!")
+                game.set_result(1)
+                # game.set_winner_message("White won!!!")
             else:
                 playerW.set_time(0)
-                game.set_winner_message("Black won!!!")
+                game.set_result(0)
+                # game.set_winner_message("Black won!!!")
             draw_time_boxes(display, playerW, playerB)
-            draw_end_game_window(display, game.get_winner_message())
+            draw_end_game_window(display, game.get_result())
             pygame.display.flip()
             pygame.time.delay(5000)
             break
@@ -389,9 +402,30 @@ def chess_window(display, game_time):
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click_pos = pygame.mouse.get_pos()
+                    if 575 <= click_pos[0] <= 705 and 345 <= click_pos[1] <= 375:
+                        pygame.time.delay(500)
+                        main()
+                    if 725 <= click_pos[0] <= 855 and 345 <= click_pos[1] <= 375:
+                        start_pause = time.time()
+                        resume_clicked = False
+                        resume_button = Button("Images/resume_no.png", "Images/resume_yes.png", [725, 345], [130, 30])
+                        while not resume_clicked:
+                            resume_button.draw(display)
+                            draw_new_game_button(display)
+                            for event in pygame.event.get():
+                                if event.type == pygame.MOUSEBUTTONDOWN:
+                                    if event.button == 1:
+                                        click_pos = pygame.mouse.get_pos()
+                                        if 575 <= click_pos[0] <= 705 and 345 <= click_pos[1] <= 375:
+                                            pygame.time.delay(500)
+                                            main()
+                                        resume_clicked = resume_button.check_click()
+                                elif event.type == pygame.QUIT:
+                                    resume_clicked = True
+                        pause_time = time.time() - start_pause
+
                     if click_pos[0] >= 510 or click_pos[1] >= 480:
                         continue
-
                     if len(first_click) == 0:
                         pos = create_pos(click_pos)
                         if is_move:
@@ -427,7 +461,8 @@ def chess_window(display, game_time):
                                 if game.get_board().is_checkmate(False):
                                     winner = playerW
                                     chackmate_king_pos = game.get_board().get_kingB_position()
-                                    game.set_winner_message("White won!!!")
+                                    # game.set_winner_message("White won!!!")
+                                    game.set_result(1)
                                     game.set_checkmate_notation()
                                     play_sound("Sounds/Checkmate.mp3")
                                     break
@@ -440,7 +475,8 @@ def chess_window(display, game_time):
                                 if game.get_board().is_checkmate(True):
                                     winner = playerB
                                     chackmate_king_pos = game.get_board().get_kingW_position()
-                                    game.set_winner_message("Black won!!!")
+                                    # game.set_winner_message("Black won!!!")
+                                    game.set_result(0)
                                     game.set_checkmate_notation()
                                     play_sound("Sounds/Checkmate.mp3")
                                     break
@@ -459,7 +495,7 @@ def chess_window(display, game_time):
         draw_figures(display, game.get_board().get_array(), next_fields_list)
         draw_broken_figures_windows(display, game)
         draw_chess_notation(display, game.get_chess_notation())
-        # draw_pause_and_restart_buttons(display)
+        draw_pause_and_new_game_buttons(display)
 
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (0, HEIGHT), 3)
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (WIDTH, 0), 3)
@@ -467,15 +503,15 @@ def chess_window(display, game_time):
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (WIDTH, HEIGHT), (WIDTH, 0), 3)
         pygame.display.flip()
 
-
         if len(chackmate_king_pos):
-            draw_end_game_window(display, game.get_winner_message())
+            # draw_end_game_window(display, game.get_winner_message())
+            draw_end_game_window(display, game.get_result())
             pygame.display.flip()
             write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)
             open = False
         if game.get_board().check_if_draw(game.get_chess_notation()):
-            draw_end_game_window(display, "Draw!!!")
+            draw_end_game_window(display, game.get_result())
             pygame.display.flip()
             write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)

@@ -16,6 +16,7 @@ class Game_Gui:
         self._board = Board()
         self._time = 0
         self._winner_message = ""
+        self._result = 2
         self._chess_notation = []
         self._broken_figures_W = []
         self._broken_figures_B = []
@@ -33,6 +34,9 @@ class Game_Gui:
 
     def get_winner_message(self):
         return self._winner_message
+
+    def get_result(self):
+        return self._result
 
     def get_playerW(self):
         return self._playerW
@@ -54,6 +58,9 @@ class Game_Gui:
 
     def set_chess_notation(self, new_chess_notation):
         self._chess_notation = new_chess_notation
+
+    def set_result(self, new_result):
+        self._result = new_result
 
     def set_winner_message(self, new_message):
         self._winner_message = new_message
