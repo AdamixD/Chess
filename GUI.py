@@ -510,12 +510,14 @@ def chess_window(display, game_time):
             write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)
             open = False
+            main()
         if game.get_board().check_if_draw(game.get_chess_notation()):
             draw_end_game_window(display, game.get_result())
             pygame.display.flip()
             write_to_file(game.get_chess_notation(), f"History/{Time.get_now()}.json")
             pygame.time.delay(5000)
             open = False
+            main()
 
 
 def main():
