@@ -85,6 +85,10 @@ def set_game_time(display, buttons, values):
                             break
             elif event.type == pygame.QUIT:
                 time_is_choosen = True
+                global QUIT_CONST
+                QUIT_CONST[0] = True
+                QUIT_CONST[1] = "Button"
+
 
     global GAME_TIME
     GAME_TIME = time_value
@@ -360,6 +364,9 @@ def lauch_window(display):
                     play_clicked = play_button.check_click()
             elif event.type == pygame.QUIT:
                 play_clicked = True
+                global QUIT_CONST
+                QUIT_CONST[0] = True
+                QUIT_CONST[1] = "Button"
 
 def chess_window(display):
     display.fill(pygame.Color(MAIN_COLOR))
@@ -412,8 +419,9 @@ def chess_window(display):
                             resume_clicked = True
                             start_pause = time.time()
                             pause_button.change_images(["Images/resume_no.png", "Images/resume_yes.png"])
-                        print(pause_time)
 
+                    if resume_clicked:
+                        continue
                     if click_pos[0] >= 510 or click_pos[1] >= 480:
                         continue
                     if len(first_click) == 0:
@@ -479,7 +487,8 @@ def chess_window(display):
                         next_fields_list = []
 
             elif event.type == pygame.QUIT:
-                open = False
+                QUIT_CONST[0] = True
+                QUIT_CONST[1] = "Button"
 
         draw_board(display, chackmate_king_pos, check_king_pos)
         draw_figures(display, game.get_board().get_array(), next_fields_list)
@@ -522,11 +531,12 @@ def main():
     program_icon = pygame.image.load('Images/program_icon.png')
     pygame.display.set_icon(program_icon)
 
+    global QUIT_CONST
     lauch_window(display)
-
-    dialog_window(display)
-
-    chess_window(display)
+    if not QUIT_CONST[0]:
+        dialog_window(display)
+    if not QUIT_CONST[0]:
+        chess_window(display)
 
     pygame.quit()
 
