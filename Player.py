@@ -1,8 +1,9 @@
 class Player:
-    def __init__(self, team, time):
+    def __init__(self, team, time, const_time):
         self._team = team
         self._score = 0
         self._time = time
+        self._const_time = const_time
 
     def get_team(self):
         return self._team
@@ -18,3 +19,6 @@ class Player:
 
     def won(self):
         self._score += 1
+    
+    def get_const_time(self):
+        return self._const_time

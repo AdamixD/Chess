@@ -38,3 +38,7 @@ class Button:
             return False
         play_sound(self._sound, 0.22)
         return True
+
+    def change_images(self, new_imgs):
+        self._before_img = new_imgs[0]
+        self._after_img = new_imgs[1]

@@ -29,7 +29,7 @@ BUTTON_WIDTH = 90
 DIALOG_WIN_HEIGHT = 250
 DIALOG_WIN_WIDTH = 200
 
-
+MAIN_FONT = "trebuc.ttf"
 FIELD_SIZE = 60
 S_WIDTH = 8*FIELD_SIZE + FIELD_SIZE//2 + 20
 
@@ -42,6 +42,9 @@ MAIN_COLOR = (44, 44, 44)
 CONTOUR_COLOR = (55, 45, 45)
 BROWN_WIN_COLOR = (36, 36, 36)
 
+GAME_TIME = 0
+QUIT_CONST = [False, ""]
+
 # Draw ################################
 def draw_launch_background(display):
     background_image = pygame.image.load("Images/background.jpg")
@@ -49,8 +52,8 @@ def draw_launch_background(display):
     display.blit(background_image, (0, 0))
     display.blit(logo_image, (550, 50))
 
-
 def dialog_window(display):
+    draw_launch_background(display)
     window_image = pygame.image.load("Images/dialog_win.png")
     display.blit(window_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 50))
 
@@ -59,39 +62,36 @@ def dialog_window(display):
     ten_button = Button("Images/ten_no.png", "Images/ten_yes.png", [(WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 190], [200, 35])
     unlimited_button = Button("Images/unlimited_no.png", "Images/unlimited_yes.png", [(WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 225], [200, 35])
 
+    buttons = [one_button, five_button, ten_button, unlimited_button]
+    values = [60, 300, 600, 1000]
+    
+    set_game_time(display, buttons, values)
+    
+def set_game_time(display, buttons, values):
     time_is_choosen = False
     time_value = None
 
     while not time_is_choosen:
-        one_button.draw(display)
-        five_button.draw(display)
-        ten_button.draw(display)
-        unlimited_button.draw(display)
+        for i in range(4):
+            buttons[i].draw(display)
+            
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if one_button.check_click():
-                        time_value = 60
-                        time_is_choosen = True
-                    elif five_button.check_click():
-                        time_value = 300
-                        time_is_choosen = True
-                    elif ten_button.check_click():
-                        time_value = 600
-                        time_is_choosen = True
-                    elif unlimited_button.check_click():
-                        time_value = 1000
-                        time_is_choosen = True
-
+                    for i in range(4):
+                        if buttons[i].check_click():
+                            time_value = values[i]
+                            time_is_choosen = True
+                            break
             elif event.type == pygame.QUIT:
                 time_is_choosen = True
 
-    return time_value
-
+    global GAME_TIME
+    GAME_TIME = time_value
 
 def draw_board(display, chackmate_king_pos, check_king_pos):
     for i in range(8):
-        font = pygame.font.Font('trebuc.ttf', 15)
+        font = pygame.font.Font(MAIN_FONT, 15)
         label = font.render(str(i+1), 0.5, (206, 206, 206))
         display.blit(label, (15, 10 + FIELD_SIZE*i))
         for j in range(8):
@@ -100,7 +100,7 @@ def draw_board(display, chackmate_king_pos, check_king_pos):
             else:
                 pygame.draw.rect(display, pygame.Color(BASIC_GREEN), pygame.Rect(i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
             if i == 7:
-                font = pygame.font.Font('trebuc.ttf', 15)
+                font = pygame.font.Font(MAIN_FONT, 15)
                 label = font.render(chr(97+j), 0.5, (206, 206, 206))
                 display.blit(label, (45 + FIELD_SIZE//2 + FIELD_SIZE*j, 480))
 
@@ -109,7 +109,6 @@ def draw_board(display, chackmate_king_pos, check_king_pos):
 
     if len(chackmate_king_pos):
         pygame.draw.rect(display, pygame.Color("Red"), pygame.Rect(chackmate_king_pos[1]*FIELD_SIZE + FIELD_SIZE//2, chackmate_king_pos[0]*FIELD_SIZE, FIELD_SIZE, FIELD_SIZE))
-
 
 def draw_figures(display, array, next_fields_list=[]):
     for field in next_fields_list:
@@ -133,8 +132,6 @@ def draw_figures(display, array, next_fields_list=[]):
                 image = pygame.image.load(figure.get_picture())
                 display.blit(image, (i*FIELD_SIZE + FIELD_SIZE//2, j*FIELD_SIZE))
 
-
-# TODO put messege in the center
 def draw_end_game_window(display, result):
     if result == 0:
         image = pygame.image.load("Images/black_won.png")
@@ -145,20 +142,13 @@ def draw_end_game_window(display, result):
 
     display.blit(image, (WIDTH//2 - M_WIDTH//2, HEIGHT//2 - M_HEIGHT//2, M_WIDTH, M_HEIGHT))
 
+def new_game_function():
+    pygame.time.delay(500)
+    main()
 
-
-# TODO rewrite this function using class Button
-def draw_pause_button(display):
-    pause_button = Button("Images/Pause_no.png", "Images/Pause_yes.png", [725, 345], [130, 30])
-    pause_button.draw(display)
-
-def draw_new_game_button(display):
-    new_game_button = Button("Images/new_game_no.png", "Images/new_game_yes.png", [575, 345], [130, 30])
-    new_game_button.draw(display)
-
-def draw_pause_and_new_game_buttons(display):
-    draw_pause_button(display)
-    draw_new_game_button(display)
+def draw_pause_and_new_game_buttons(display, buttons):
+    for button in buttons:
+        button.draw(display)
 
 def draw_chess_notation(display, notation):
     pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(S_WIDTH, 90, WIDTH-S_WIDTH - 20, 242))
@@ -168,7 +158,7 @@ def draw_chess_notation(display, notation):
     for i in range(0, len(notation) - len(notation) % 2, 2):
         if num % 16 == 0 and num > 1:
             TEXT_X += 125
-        font = pygame.font.Font('trebuc.ttf', 15)
+        font = pygame.font.Font(MAIN_FONT, 15)
         label = font.render(f"{num+1}. {notation[i]} {notation[i+1]}", 0.5, CHESS_WHITE)
         display.blit(label, (TEXT_X, 90 + (num % 16)*15))
         num += 1
@@ -176,10 +166,9 @@ def draw_chess_notation(display, notation):
     if len(notation) % 2 == 1:
         if num % 16 == 0 and num > 1:
             TEXT_X += 120
-        font = pygame.font.Font('trebuc.ttf', 15)
+        font = pygame.font.Font(MAIN_FONT, 15)
         label = font.render(f"{num+1}. {notation[len(notation)-1]}", 0.5, CHESS_WHITE)
         display.blit(label, (TEXT_X, 90 + (num % 16)*15))
-
 
 def draw_time_box(display, player, position, path):
     box_image = pygame.image.load(path)
@@ -187,7 +176,7 @@ def draw_time_box(display, player, position, path):
     text = f" -- : --"
     if time != 1000:
         text = f"{time // 60:02} : {time % 60:02}"
-    font = pygame.font.Font('trebuc.ttf', 15)
+    font = pygame.font.Font(MAIN_FONT, 15)
     color = MAIN_COLOR
     if not player.get_team():
         color = CHESS_WHITE
@@ -196,11 +185,41 @@ def draw_time_box(display, player, position, path):
     display.blit(box_image, (position[0], position[1]))
     display.blit(label, (position[0] + 5, position[1] + 5))
 
-
 def draw_time_boxes(display, playerW, playerB):
     draw_time_box(display, playerW, [8*FIELD_SIZE + FIELD_SIZE//2 + 20, 7*FIELD_SIZE + FIELD_SIZE//2], "Images/white_time.png")
     draw_time_box(display, playerB, [8*FIELD_SIZE + FIELD_SIZE//2 + 20, 0], "Images/black_time.png")
 
+def update_players_time(display, players, start_time, pause_time, is_move):
+    playerW = players[0]
+    playerB = players[1]
+    
+    if GAME_TIME == 1000:
+        pass # unlimited
+    elif is_move:
+        opponent_time_move = playerB.get_const_time() - (start_time + playerB.get_time())
+        player_time = playerW.get_const_time() - (time.time()) + pause_time + opponent_time_move
+        playerW.set_time(player_time)
+    else:
+        opponent_time_move = playerW.get_const_time() - (start_time + playerW.get_time())
+        player_time = playerB.get_const_time() - (time.time()) + pause_time + opponent_time_move
+        playerB.set_time(player_time)
+
+    draw_time_boxes(display, playerW, playerB)
+
+def check_time_end(game, players):
+    playerW = players[0]
+    playerB = players[1]
+
+    if playerW.get_time() <= 0 or playerB.get_time() <= 0:
+        if playerB.get_time() <= 0:
+            playerB.set_time(0)
+            game.set_result(1)
+        else:
+            playerW.set_time(0)
+            game.set_result(0)
+        global QUIT_CONST
+        QUIT_CONST[0] = True
+        QUIT_CONST[1] = "Time"
 
 def draw_broken_figure_window(display, team, pos, game):
     pygame.draw.rect(display, pygame.Color(BROWN_WIN_COLOR), pygame.Rect(pos[0], pos[1], 370, 50))
@@ -229,11 +248,9 @@ def draw_broken_figure_window(display, team, pos, game):
                 display.blit(image, (S_WIDTH + (index % 14)*25, 415))
             index += 1
 
-
 def draw_broken_figures_windows(display, game):
     draw_broken_figure_window(display, True, [S_WIDTH, 35], game)
     draw_broken_figure_window(display, False, [S_WIDTH, 390], game)
-
 
 def create_figure(name, team, pos):
     if name == "r":
@@ -259,7 +276,6 @@ def create_figure(name, team, pos):
 
     return new_figure
 
-
 def replacing_pawn(board, pawn):
     is_choosen = False
     while not is_choosen:
@@ -271,7 +287,6 @@ def replacing_pawn(board, pawn):
                     if pawn.get_position()[1] * FIELD_SIZE + FIELD_SIZE//2 < click_pos[0] < (pawn.get_position()[1] + 1) * FIELD_SIZE + FIELD_SIZE//2:
                         if pawn.get_team():
                             list_of_pos = [1, 5]
-                            # list_of_figures_names = ["n", "b", "q", "r"]
                         else:
                             list_of_pos = [5, 9]
                             # I don't know how, but it is working (also line 149)
@@ -287,7 +302,6 @@ def replacing_pawn(board, pawn):
                                 board.addFigure(new_figure)
                                 is_choosen = True
                                 break
-
 
 def draw_pawn_converting_window(display, pawn):
     if pawn.get_team():
@@ -327,13 +341,11 @@ def draw_pawn_converting_window(display, pawn):
     pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), ((pawn.get_position()[1] + 1) * FIELD_SIZE + FIELD_SIZE//2, i_max * FIELD_SIZE), (pawn.get_position()[1] * FIELD_SIZE + FIELD_SIZE//2, i_max * FIELD_SIZE), 3)
     pygame.display.flip()
 
-
 def create_pos(click_pos):
     row = click_pos[1]// FIELD_SIZE
     col = (click_pos[0] - FIELD_SIZE//2) // FIELD_SIZE
 
     return [row, col]
-
 
 def lauch_window(display):
     draw_launch_background(display)
@@ -349,8 +361,7 @@ def lauch_window(display):
             elif event.type == pygame.QUIT:
                 play_clicked = True
 
-
-def chess_window(display, game_time):
+def chess_window(display):
     display.fill(pygame.Color(MAIN_COLOR))
 
     game = Game_Gui()
@@ -358,8 +369,12 @@ def chess_window(display, game_time):
 
     # is_move == True when white, == False when black
     is_move = True
-    playerW = Player(True, game_time)
-    playerB = Player(False, game_time)
+
+    start_time = time.time()
+    global GAME_TIME
+
+    playerW = Player(True, GAME_TIME, GAME_TIME + start_time)
+    playerB = Player(False, GAME_TIME, GAME_TIME + start_time)
     winner = None
 
     chackmate_king_pos = []
@@ -367,62 +382,37 @@ def chess_window(display, game_time):
 
     first_click = []
     next_fields_list = []
-    start_time = time.time()
+
     pause_time = 0
-    while open:
-        if game_time == 1000:
-            pass # unlimited
-        elif is_move:
-            player_time = playerW.get_time() - (time.time() - start_time) + pause_time
-            playerW.set_time(player_time)
-        else:
-            player_time = playerB.get_time() - (time.time() - start_time) + pause_time
-            playerB.set_time(player_time)
+    start_pause = 0
+    resume_clicked = False
 
-        pause_time = 0
+    pause_button = Button("Images/Pause_no.png", "Images/Pause_yes.png", [725, 345], [130, 30])
+    new_game_button = Button("Images/new_game_no.png", "Images/new_game_yes.png", [575, 345], [130, 30])
+    # resume_button = Button("Images/resume_no.png", "Images/resume_yes.png", [725, 345], [130, 30])
 
-        draw_time_boxes(display, playerW, playerB)
-        start_time = time.time()
-        if playerW.get_time() <= 0 or playerB.get_time() <= 0:
-            if playerB.get_time() <= 0:
-                playerB.set_time(0)
-                game.set_result(1)
-                # game.set_winner_message("White won!!!")
-            else:
-                playerW.set_time(0)
-                game.set_result(0)
-                # game.set_winner_message("Black won!!!")
-            draw_time_boxes(display, playerW, playerB)
-            draw_end_game_window(display, game.get_result())
-            pygame.display.flip()
-            pygame.time.delay(5000)
-            break
-
+    while open and not QUIT_CONST[0]:
+        if not resume_clicked:
+            update_players_time(display, [playerW, playerB], start_time, pause_time, is_move)
+            check_time_end(game, [playerW, playerB])
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     click_pos = pygame.mouse.get_pos()
-                    if 575 <= click_pos[0] <= 705 and 345 <= click_pos[1] <= 375:
-                        pygame.time.delay(500)
-                        main()
-                    if 725 <= click_pos[0] <= 855 and 345 <= click_pos[1] <= 375:
-                        start_pause = time.time()
-                        resume_clicked = False
-                        resume_button = Button("Images/resume_no.png", "Images/resume_yes.png", [725, 345], [130, 30])
-                        while not resume_clicked:
-                            resume_button.draw(display)
-                            draw_new_game_button(display)
-                            for event in pygame.event.get():
-                                if event.type == pygame.MOUSEBUTTONDOWN:
-                                    if event.button == 1:
-                                        click_pos = pygame.mouse.get_pos()
-                                        if 575 <= click_pos[0] <= 705 and 345 <= click_pos[1] <= 375:
-                                            pygame.time.delay(500)
-                                            main()
-                                        resume_clicked = resume_button.check_click()
-                                elif event.type == pygame.QUIT:
-                                    resume_clicked = True
-                        pause_time = time.time() - start_pause
+
+                    if new_game_button.check_click():
+                        new_game_function()
+                    
+                    if pause_button.check_click():
+                        if resume_clicked:
+                            resume_clicked = False
+                            pause_time = time.time() - start_pause
+                            pause_button.change_images(["Images/Pause_no.png", "Images/Pause_yes.png"])
+                        else:
+                            resume_clicked = True
+                            start_pause = time.time()
+                            pause_button.change_images(["Images/resume_no.png", "Images/resume_yes.png"])
+                        print(pause_time)
 
                     if click_pos[0] >= 510 or click_pos[1] >= 480:
                         continue
@@ -495,7 +485,11 @@ def chess_window(display, game_time):
         draw_figures(display, game.get_board().get_array(), next_fields_list)
         draw_broken_figures_windows(display, game)
         draw_chess_notation(display, game.get_chess_notation())
-        draw_pause_and_new_game_buttons(display)
+
+        # if resume_clicked:
+        #     draw_pause_and_new_game_buttons(display, [new_game_button, resume_button])
+        # else:
+        draw_pause_and_new_game_buttons(display, [new_game_button, pause_button])
 
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (0, HEIGHT), 3)
         pygame.draw.line(display, pygame.Color(CONTOUR_COLOR), (0, 0), (WIDTH, 0), 3)
@@ -530,13 +524,9 @@ def main():
 
     lauch_window(display)
 
-    # TODO create time window
+    dialog_window(display)
 
-    draw_launch_background(display)
-    game_time = dialog_window(display)
-    pygame.display.flip()
-
-    chess_window(display, game_time)
+    chess_window(display)
 
     pygame.quit()
 
