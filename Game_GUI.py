@@ -10,6 +10,7 @@ from Board import Board
 from Player import Player
 from time import time
 from SoundsPlayer import play_sound
+import copy
 
 class Game_Gui:
     def __init__(self):
@@ -20,6 +21,7 @@ class Game_Gui:
         self._chess_notation = []
         self._broken_figures_W = []
         self._broken_figures_B = []
+        self._main_depth = 2
         # self.create_players()
 
     def create_players(self):
@@ -137,6 +139,42 @@ class Game_Gui:
             self._broken_figures_W.append(figure)
         else:
             self._broken_figures_B.append(figure)
+
+    def find_weight(self, board):
+        weight = 0
+        for i in range(8):
+            for j in range(8):
+                weight += board.get_array()[i][j].get_weight()
+        return weight
+
+    def find_the_best_weight(self, team, depth, board, best_weight, next_move):
+        if depth == 0:
+            return self.find_weight(board)
+
+        for i in range(8):
+            for j in range(8):
+                figure = self._board().get_array()[i][j]
+                if figure.get_team() == team:
+                    valid_moves = self.get_next_fields_list([i, j])
+                    valid_moves.append(self.get_castling_fields([i, j]))
+                    for move in valid_moves:
+                        board_copy = copy.deepcopy(board)
+                        board_copy.change_figure_position([i, j], move)
+                        new_weight = self.find_the_best_weight(not team, depth - 1, board_copy, best_weight, next_move)
+                        if new_weight < best_weight:
+                            best_weight = new_weight
+                            if depth == self._main_depth:
+                                next_move = [i, j]
+
+
+
+    def choose_AI_position(self, depth):
+        max_weight = 0
+        max_index = 0
+        boards = []
+
+        new_position = []
+        return new_position
 
     def move(self, old_position, new_position):
         next_fields_list = self.get_next_fields_list(old_position)

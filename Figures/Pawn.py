@@ -8,6 +8,9 @@ class Pawn(Figure):
         self._two_step_move = False
         self._en_passant = []
         self._found_en_passant = False
+        self._weight = 10
+        if not team:
+            self._weight = -10
 
     def get_is_moved(self):
         return self._is_moved
@@ -17,16 +20,16 @@ class Pawn(Figure):
 
     def get_two_step_move(self):
         return self._two_step_move
-    
+
     def set_two_step_move(self, new_two_step_move):
         self._two_step_move = new_two_step_move
-    
+
     def get_en_passant(self):
         return self._en_passant
-    
+
     def get_found_en_passant(self):
         return self._found_en_passant
-    
+
     def check_next_field(self, board, use_if_check=True):
         array = []
         x = self._position[0]
@@ -65,7 +68,7 @@ class Pawn(Figure):
                             self._en_passant.append([x, y+step])
                             self._found_en_passant = True
 
-                        
+
 
                     if y-step>=0 and y-step<8:
                         figure = board_array[x][y-step]
@@ -73,7 +76,7 @@ class Pawn(Figure):
                             self.next_field_appending(array, use_if_check, board, [x+step, y-step])
                             self._en_passant.append([x, y-step])
                             self._found_en_passant = True
-                    
+
                     if not self._found_en_passant:
                         self._en_passant = []
         return array

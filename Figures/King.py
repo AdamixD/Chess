@@ -6,6 +6,9 @@ class King(Figure):
         self._combinations = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
         self._long_step_move = False
         self._is_moved = is_moved
+        self._weight = 900
+        if not team:
+            self._weight = -900
 
     def if_castling(self, board):
         fields_for_castling = []
@@ -13,7 +16,7 @@ class King(Figure):
         team = self._team
         if board.is_check(team):
             return fields_for_castling
-        
+
         if not self._is_moved:
             array = board.get_array()
             row = self.get_position()[0]
@@ -23,7 +26,7 @@ class King(Figure):
             for data in castling_data:
                 if array[row][data[0]].get_name().lower() == "r" and not array[row][data[0]].get_is_moved():
                     castling = True
-                    
+
                     for i in range(data[1][0], data[1][1]):
                         if array[row][i].get_name() != " ":
                             castling = False

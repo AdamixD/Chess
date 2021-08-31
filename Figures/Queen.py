@@ -5,3 +5,6 @@ class Queen(Figure):
         super().__init__(name, position, picture, team)
         self._combinations = [[0, 1], [1, 0], [0, -1], [-1, 0], [1, 1], [1, -1], [-1, 1], [-1, -1]]
         self._long_step_move = True
+        self._weight = 90
+        if not team:
+            self._weight = -90
