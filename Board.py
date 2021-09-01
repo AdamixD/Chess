@@ -11,6 +11,10 @@ class Board:
         self.create_board()
         self._kingW_position = [7, 4]
         self._kingB_position = [0, 4]
+        self._pawn_converted = []
+
+    def get_pawn_converted(self):
+        return self._pawn_converted
 
     def create_board(self):
         self._array = []
@@ -147,6 +151,7 @@ class Board:
             else:
                 self._array[old_x][old_y].set_two_step_move(False)
 
+
         if self._array[old_x][old_y].get_name().lower() == "p":
             if self._array[old_x][old_y].get_found_en_passant():
                 for en_passant_pos in self._array[old_x][old_y].get_en_passant():
@@ -156,6 +161,20 @@ class Board:
         self._array[old_x][old_y].set_position([new_x, new_y])
         self._array[new_x][new_y] = self._array[old_x][old_y]
         self._array[old_x][old_y] = EmptyField([old_x, old_y], " ")
+
+        self._pawn_converted = []
+
+        if self._array[new_x][new_y].get_name().lower() == "p":
+            if self._array[new_x][new_y].get_team():
+                if new_position[0] == 0:
+                    queen = Queen("Q", new_position, "Images/Queen_W.png", True)
+                    self.addFigure(queen)
+                    self._pawn_converted = new_position
+            else:
+                if new_position[0] == 7:
+                    queen = Queen("q", new_position, "Images/Queen_B.png", False)
+                    self.addFigure(queen)
+                    self._pawn_converted = new_position
 
     def castling(self, new_king_pos):
         row = new_king_pos[0]
@@ -188,7 +207,7 @@ class Board:
             king_position = self._kingW_position
         else:
             king_position = self._kingB_position
-        
+
         #check if king has fields to go
         kings_fields_list = self._array[king_position[0]][king_position[1]].check_next_field(self)
 
@@ -215,7 +234,7 @@ class Board:
             if not self.check_if_figures_have_possible_field(True) or not self.check_if_figures_have_possible_field(False):
                 return True
         return False
-    
+
     def check_dead_position(self):
         chess_dict = {
             "k" : 0,
@@ -258,11 +277,11 @@ class Board:
                     count = 1
                 else:
                     count += 1
-                
+
                 if count == 3:
                     return True
         return False
-    
+
     def check_if_draw(self, history):
         #Stalemate
         if self.check_stalemate():
@@ -273,13 +292,13 @@ class Board:
         if self.check_dead_position():
             print("Dead position")
             return True
-                    
+
         #TODO Mutual Agreement
         #Threefold Repetition
         if self.check_threefold_repetition(history):
             print("3")
             return True
-        
+
         return False
         #TODO 50-Move Rule
 

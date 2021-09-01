@@ -8,7 +8,7 @@ from Figures.Bishop import Bishop
 from Figures.EmptyField import EmptyField
 from Board import Board
 from Player import Player
-from time import time
+import time
 from SoundsPlayer import play_sound
 import copy
 
@@ -24,9 +24,13 @@ class Game_Gui:
         self._chess_notation = []
         self._broken_figures_W = []
         self._broken_figures_B = []
-        self._main_depth = 2
+        self._main_depth = 3
         self._ai_next_move = []
+        self._deepcopy_time = 0
         # self.create_players()
+
+    def get_deepcopy_time(self):
+        return self._deepcopy_time
 
     def create_players(self):
         self._playerW = Player(True)
@@ -110,7 +114,10 @@ class Game_Gui:
         return False
 
     def check_if_pawn_converting(self, new_position):
-        if self._board.get_array()[new_position[0]][new_position[1]].get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
+        # if self._board.get_array()[new_position[0]][new_position[1]].get_name().lower() == "p" and (new_position[0] == 0 or new_position[0] == 7):
+        #     return True
+        # return False
+        if self._board.get_pawn_converted():
             return True
         return False
 
@@ -153,7 +160,7 @@ class Game_Gui:
     #         return -CHECKMATE
     #     elif board.is_checkmate(False):
     #         return CHECKMATE
-        
+
     #     if board.check_if_draw(self._chess_notation):
     #         return DRAW
 
@@ -168,21 +175,21 @@ class Game_Gui:
     #             else:
     #                 weight -= figure.get_weight()
     #     return weight
-    
+
     def find_weight(self, board):
+        # a = time.time()
         weight = 0
         for i in range(8):
             for j in range(8):
                 figure = board.get_array()[i][j]
                 if figure.get_name() == " ":
                     continue
-                if figure.get_team():
-                    weight += figure.get_weight()
-                else:
-                    weight -= figure.get_weight()
+                weight += figure.get_weight()
+        # b = time.time()
+        # self._deepcopy_time += (b-a)
         return weight
-    
-    def find_the_best_move(self, team, depth):
+
+    def find_the_best_move(self, team, depth, alpha, beta):
         if depth == 0:
             return self.find_weight(self.get_board())
 
@@ -202,7 +209,7 @@ class Game_Gui:
                     for move in valid_moves:
                         board_copy = copy.deepcopy(self._board)
                         self.get_board().change_figure_position([i, j], move)
-                        new_weight = self.find_the_best_move(not team, depth - 1)
+                        new_weight = self.find_the_best_move(not team, depth - 1, alpha, beta)
                         if team:
                             if new_weight > max_weight:
                                 max_weight = new_weight
@@ -214,6 +221,19 @@ class Game_Gui:
                                 if depth == self._main_depth:
                                     self._ai_next_move = [[i, j], move]
                         self._board = board_copy
+
+
+                        if team:
+                            if max_weight > alpha:
+                                alpha = max_weight
+                        else:
+                            if max_weight < beta:
+                                beta = max_weight
+                        if alpha >= beta:
+                            break
+
+
+
         return max_weight
 
     def move(self, old_position, new_position):
