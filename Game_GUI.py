@@ -148,11 +148,38 @@ class Game_Gui:
         else:
             self._broken_figures_B.append(figure)
 
+    # def find_board_weight(self, board):
+    #     if board.is_checkmate(True):
+    #         return -CHECKMATE
+    #     elif board.is_checkmate(False):
+    #         return CHECKMATE
+        
+    #     if board.check_if_draw(self._chess_notation):
+    #         return DRAW
+
+    #     weight = 0
+    #     for i in range(8):
+    #         for j in range(8):
+    #             figure = board.get_array()[i][j]
+    #             if figure.get_name() == " ":
+    #                 continue
+    #             if figure.get_team():
+    #                 weight += figure.get_weight()
+    #             else:
+    #                 weight -= figure.get_weight()
+    #     return weight
+    
     def find_weight(self, board):
         weight = 0
         for i in range(8):
             for j in range(8):
-                weight += board.get_array()[i][j].get_weight()
+                figure = board.get_array()[i][j]
+                if figure.get_name() == " ":
+                    continue
+                if figure.get_team():
+                    weight += figure.get_weight()
+                else:
+                    weight -= figure.get_weight()
         return weight
     
     def find_the_best_move(self, team, depth):
@@ -178,12 +205,12 @@ class Game_Gui:
                         new_weight = self.find_the_best_move(not team, depth - 1)
                         if team:
                             if new_weight > max_weight:
-                                max_weight = max_weight
+                                max_weight = new_weight
                                 if depth == self._main_depth:
                                     self._ai_next_move = [[i, j], move]
                         else:
                             if new_weight < max_weight:
-                                max_weight = max_weight
+                                max_weight = new_weight
                                 if depth == self._main_depth:
                                     self._ai_next_move = [[i, j], move]
                         self._board = board_copy
