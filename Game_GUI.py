@@ -96,9 +96,9 @@ class Game_Gui:
         return castling_fields
 
     #TODO add to board
-    def get_next_fields_list(self, pos):
+    def get_next_fields_list(self, pos, use_if_check=True):
         figure = self._board.get_array()[pos[0]][pos[1]]
-        next_fields_list = figure.check_next_field(self._board)
+        next_fields_list = figure.check_next_field(self._board, use_if_check)
         castling_fields = self.get_castling_fields(pos)
 
         for field in castling_fields:
@@ -178,6 +178,13 @@ class Game_Gui:
 
     def find_weight(self, board):
         # a = time.time()
+        if board.is_checkmate(True):
+            return -CHECKMATE
+        elif board.is_checkmate(False):
+            return CHECKMATE
+        elif board.check_if_draw():
+            return 0
+
         weight = 0
         for i in range(8):
             for j in range(8):
@@ -205,7 +212,7 @@ class Game_Gui:
                     valid_moves = self.get_next_fields_list([i, j])
                     castling_fields = self.get_castling_fields([i, j])
                     if castling_fields:
-                        valid_moves.append(castling_fields)
+                        valid_moves += castling_fields
                     for move in valid_moves:
                         board_copy = copy.deepcopy(self._board)
                         self.get_board().change_figure_position([i, j], move)
