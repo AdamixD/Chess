@@ -87,27 +87,8 @@ class Game_Gui:
                 return True
         return False
 
-    def get_castling_fields(self, pos):
-        figure = self._board.get_array()[pos[0]][pos[1]]
-        castling_fields = []
-
-        if figure.get_name().lower() == "k":
-            castling_fields = figure.if_castling(self._board)
-        return castling_fields
-
-    #TODO add to board
-    def get_next_fields_list(self, pos):
-        figure = self._board.get_array()[pos[0]][pos[1]]
-        next_fields_list = figure.check_next_field(self._board)
-        castling_fields = self.get_castling_fields(pos)
-
-        for field in castling_fields:
-            next_fields_list.append(field)
-
-        return next_fields_list
-
     def check_move(self, old_position, new_position):
-        next_fields_list = self.get_next_fields_list(old_position)
+        next_fields_list = self._board.get_next_fields_list(old_position)
         for next_field in next_fields_list:
             if next_field == new_position:
                 return True
@@ -155,26 +136,26 @@ class Game_Gui:
         else:
             self._broken_figures_B.append(figure)
 
-    # def find_board_weight(self, board):
-    #     if board.is_checkmate(True):
-    #         return -CHECKMATE
-    #     elif board.is_checkmate(False):
-    #         return CHECKMATE
+    def find_board_weight(self, board):
+        if board.is_checkmate(True):
+            return -CHECKMATE
+        elif board.is_checkmate(False):
+            return CHECKMATE
 
-    #     if board.check_if_draw(self._chess_notation):
-    #         return DRAW
+        if board.check_if_draw(self._chess_notation):
+            return DRAW
 
-    #     weight = 0
-    #     for i in range(8):
-    #         for j in range(8):
-    #             figure = board.get_array()[i][j]
-    #             if figure.get_name() == " ":
-    #                 continue
-    #             if figure.get_team():
-    #                 weight += figure.get_weight()
-    #             else:
-    #                 weight -= figure.get_weight()
-    #     return weight
+        weight = 0
+        for i in range(8):
+            for j in range(8):
+                figure = board.get_array()[i][j]
+                if figure.get_name() == " ":
+                    continue
+                if figure.get_team():
+                    weight += figure.get_weight()
+                else:
+                    weight -= figure.get_weight()
+        return weight
 
     def find_weight(self, board):
         # a = time.time()
@@ -189,56 +170,82 @@ class Game_Gui:
         # self._deepcopy_time += (b-a)
         return weight
 
-    def find_the_best_move(self, team, depth, alpha, beta):
+    # def find_the_best_move(self, team, depth, alpha, beta):
+    #     if depth == 0:
+    #         return self.find_weight(self.get_board())
+
+    #     if team:
+    #         max_weight = -CHECKMATE
+    #     else:
+    #         max_weight = CHECKMATE
+
+    #     for i in range(8):
+    #         for j in range(8):
+    #             figure = self.get_board().get_array()[i][j]
+    #             if figure.get_name() != " " and figure.get_team() == team:
+    #                 valid_moves = self._board.get_next_fields_list([i, j])
+    #                 for move in valid_moves:
+    #                     board_copy = copy.deepcopy(self._board)
+    #                     self.get_board().change_figure_position([i, j], move)
+    #                     new_weight = self.find_the_best_move(not team, depth - 1, alpha, beta)
+    #                     if team:
+    #                         if new_weight > max_weight:
+    #                             max_weight = new_weight
+    #                             if depth == self._main_depth:
+    #                                 self._ai_next_move = [[i, j], move]
+    #                     else:
+    #                         if new_weight < max_weight:
+    #                             max_weight = new_weight
+    #                             if depth == self._main_depth:
+    #                                 self._ai_next_move = [[i, j], move]
+    #                     self._board = board_copy
+
+
+    #                     if team:
+    #                         if max_weight > alpha:
+    #                             alpha = max_weight
+    #                     else:
+    #                         if max_weight < beta:
+    #                             beta = max_weight
+    #                     if alpha >= beta:
+    #                         break
+
+
+
+    #     return max_weight
+
+    def find_the_best_move(self, depth, possible_moves, alpha, beta, team_num):
         if depth == 0:
-            return self.find_weight(self.get_board())
-
-        if team:
-            max_weight = -CHECKMATE
-        else:
-            max_weight = CHECKMATE
-
-        for i in range(8):
-            for j in range(8):
-                figure = self.get_board().get_array()[i][j]
-                if figure.get_name() != " " and figure.get_team() == team:
-                    valid_moves = self.get_next_fields_list([i, j])
-                    castling_fields = self.get_castling_fields([i, j])
-                    if castling_fields:
-                        valid_moves.append(castling_fields)
-                    for move in valid_moves:
-                        board_copy = copy.deepcopy(self._board)
-                        self.get_board().change_figure_position([i, j], move)
-                        new_weight = self.find_the_best_move(not team, depth - 1, alpha, beta)
-                        if team:
-                            if new_weight > max_weight:
-                                max_weight = new_weight
-                                if depth == self._main_depth:
-                                    self._ai_next_move = [[i, j], move]
-                        else:
-                            if new_weight < max_weight:
-                                max_weight = new_weight
-                                if depth == self._main_depth:
-                                    self._ai_next_move = [[i, j], move]
-                        self._board = board_copy
-
-
-                        if team:
-                            if max_weight > alpha:
-                                alpha = max_weight
-                        else:
-                            if max_weight < beta:
-                                beta = max_weight
-                        if alpha >= beta:
-                            break
-
-
-
+            return team_num * self.find_board_weight(self._board)
+        
+        max_weight = -CHECKMATE
+        for move in possible_moves:
+            figure_pos = [move[2], move[3]]
+            next_move = [move[0], move[1]]
+            board_copy = copy.deepcopy(self._board)
+            
+            self._board.change_figure_position(figure_pos, next_move)
+            a = time.time()
+            new_possible_moves = self._board.get_all_possible_moves(True if team_num == 1 else False)
+            b = time.time()
+            self._deepcopy_time += (b-a)
+            new_weight = -self.find_the_best_move(depth - 1, new_possible_moves, -beta, -alpha, -team_num)
+            if new_weight > max_weight:
+                max_weight = new_weight
+                if depth == self._main_depth:
+                    self._ai_next_move = [figure_pos, next_move]
+            self._board = board_copy
+            if max_weight > alpha:
+                alpha = max_weight
+            if alpha >= beta:
+                break
         return max_weight
 
+        
+
     def move(self, old_position, new_position):
-        next_fields_list = self.get_next_fields_list(old_position)
-        castling_fields = self.get_castling_fields(old_position)
+        next_fields_list = self._board.get_next_fields_list(old_position)
+        castling_fields = self._board.get_castling_fields(old_position)
 
         for next_field in next_fields_list:
             if next_field == new_position:

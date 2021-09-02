@@ -1,7 +1,7 @@
 from Board import Board
 from Game_GUI import Game_Gui
 import time
-
+import random
 CHECKMATE = 100000
 
 game = Game_Gui()
@@ -15,7 +15,9 @@ while not game.get_board().is_checkmate(True) or not game.get_board().is_checkma
         next_move = [old_pos, new_pos]
     else:
         a = time.time()
-        game.find_the_best_move(turn, 3, -CHECKMATE, CHECKMATE)
+        possible_moves = game.get_board().get_all_possible_moves(turn)
+        random.shuffle(possible_moves)
+        game.find_the_best_move(3, possible_moves, -CHECKMATE, CHECKMATE, 1 if turn else -1)
         next_move = game.get_ai_next_move()
         turn = True
         b = time.time()

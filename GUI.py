@@ -428,11 +428,11 @@ def chess_window(display):
                         pos = create_pos(click_pos)
                         if is_move:
                             if game.check_choosen_figure(playerW, pos):
-                                next_fields_list = game.get_next_fields_list(pos)
+                                next_fields_list = game.get_board().get_next_fields_list(pos)
                                 first_click = click_pos
                         else:
                             if game.check_choosen_figure(playerB, pos):
-                                next_fields_list = game.get_next_fields_list(pos)
+                                next_fields_list = game.get_board().get_next_fields_list(pos)
                                 first_click = click_pos
                     elif len(first_click) == 2:
                         old_pos = create_pos(first_click)

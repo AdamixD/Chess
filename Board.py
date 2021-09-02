@@ -129,6 +129,24 @@ class Board:
             print(i, end="")
             print(self._array[i])
 
+    def get_castling_fields(self, pos):
+        figure = self._array[pos[0]][pos[1]]
+        castling_fields = []
+
+        if figure.get_name().lower() == "k":
+            castling_fields = figure.if_castling(self)
+        return castling_fields
+
+    def get_next_fields_list(self, pos):
+        figure = self._array[pos[0]][pos[1]]
+        next_fields_list = figure.check_next_field(self)
+        castling_fields = self.get_castling_fields(pos)
+
+        for field in castling_fields:
+            next_fields_list.append(field)
+
+        return next_fields_list
+    
     def change_figure_position(self, old_position, new_position):
         old_x, old_y = old_position
         new_x, new_y = new_position
@@ -175,6 +193,19 @@ class Board:
                     queen = Queen("q", new_position, "Images/Queen_B.png", False)
                     self.addFigure(queen)
                     self._pawn_converted = new_position
+
+    def get_all_possible_moves(self, team):
+        moves = []
+        for i in range(8):
+            for j in range(8):
+                figure = self._array[i][j]
+                if figure.get_name() != " " and figure.get_team() == team:
+                    next_field_list = self.get_next_fields_list([i, j])
+                    for next_field in next_field_list:
+                        next_field.append(i)
+                        next_field.append(j)
+                        moves.append(next_field)
+        return moves
 
     def castling(self, new_king_pos):
         row = new_king_pos[0]
