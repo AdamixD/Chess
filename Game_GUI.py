@@ -178,12 +178,12 @@ class Game_Gui:
 
     def find_weight(self, board):
         # a = time.time()
-        if board.is_checkmate(True):
-            return -CHECKMATE
-        elif board.is_checkmate(False):
-            return CHECKMATE
-        elif board.check_if_draw():
-            return 0
+        # if board.is_checkmate(True):
+        #     return -CHECKMATE
+        # elif board.is_checkmate(False):
+        #     return CHECKMATE
+        # elif board.check_if_draw():
+        #     return 0
 
         weight = 0
         for i in range(8):
@@ -209,7 +209,7 @@ class Game_Gui:
             for j in range(8):
                 figure = self.get_board().get_array()[i][j]
                 if figure.get_name() != " " and figure.get_team() == team:
-                    valid_moves = self.get_next_fields_list([i, j])
+                    valid_moves = self.get_next_fields_list([i, j], False)
                     castling_fields = self.get_castling_fields([i, j])
                     if castling_fields:
                         valid_moves += castling_fields
@@ -238,9 +238,6 @@ class Game_Gui:
                                 beta = max_weight
                         if alpha >= beta:
                             break
-
-
-
         return max_weight
 
     def move(self, old_position, new_position):
