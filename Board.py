@@ -282,22 +282,22 @@ class Board:
                     return True
         return False
 
-    def check_if_draw(self):
+    def check_if_draw(self, history):
         #Stalemate
         if self.check_stalemate():
             print("Stalemate")
             return True
 
         #Dead Position
-        # if self.check_dead_position():
-        #     print("Dead position")
-        #     return True
+        if self.check_dead_position():
+            print("Dead position")
+            return True
 
         # #TODO Mutual Agreement
         # #Threefold Repetition
-        # if self.check_threefold_repetition(history):
-        #     print("3")
-        #     return True
+        if self.check_threefold_repetition(history):
+            print("3")
+            return True
 
         return False
         #TODO 50-Move Rule

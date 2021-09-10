@@ -42,8 +42,12 @@ MAIN_COLOR = (44, 44, 44)
 CONTOUR_COLOR = (55, 45, 45)
 BROWN_WIN_COLOR = (36, 36, 36)
 
+CHECKMATE = 100000
+
 GAME_TIME = 0
+GAME_OPTION = None
 QUIT_CONST = [False, ""]
+NEW_GAME_BTN = False
 
 # Draw ################################
 def draw_launch_background(display):
@@ -52,7 +56,47 @@ def draw_launch_background(display):
     display.blit(background_image, (0, 0))
     display.blit(logo_image, (550, 50))
 
-def dialog_window(display):
+def dialog_window_game_type(display):
+    draw_launch_background(display)
+    window_image = pygame.image.load("Images/game_option.png")
+    display.blit(window_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 50))
+
+    two_players = Button("Images/Two_Players_no.png", "Images/Two_Players_yes.png", [(WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 155], [200, 35])
+    computer = Button("Images/Play_with_Computer_no.png", "Images/Play_with_Computer_yes.png", [(WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 190], [200, 35])
+
+    buttons = [two_players, computer]
+    values = [True, False]
+
+    set_game_type(display, buttons, values)
+
+def set_game_type(display, buttons, values):
+    option_is_choosen = False
+    # True - two players, False - play with computer
+    game_type = None
+
+    while not option_is_choosen:
+        for i in range(2):
+            buttons[i].draw(display)
+
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for i in range(2):
+                        if buttons[i].check_click():
+                            game_type = values[i]
+                            option_is_choosen = True
+                            break
+            elif event.type == pygame.QUIT:
+                option_is_choosen = True
+                global QUIT_CONST
+                QUIT_CONST[0] = True
+                QUIT_CONST[1] = "Button"
+
+
+    global GAME_OPTION
+    GAME_OPTION = game_type
+
+def dialog_window_time(display):
     draw_launch_background(display)
     window_image = pygame.image.load("Images/dialog_win.png")
     display.blit(window_image, ((WIDTH - DIALOG_WIN_WIDTH)//2, (HEIGHT - DIALOG_WIN_HEIGHT)//2 + 50))
@@ -64,9 +108,9 @@ def dialog_window(display):
 
     buttons = [one_button, five_button, ten_button, unlimited_button]
     values = [60, 300, 600, 1000]
-    
+
     set_game_time(display, buttons, values)
-    
+
 def set_game_time(display, buttons, values):
     time_is_choosen = False
     time_value = None
@@ -74,7 +118,7 @@ def set_game_time(display, buttons, values):
     while not time_is_choosen:
         for i in range(4):
             buttons[i].draw(display)
-            
+
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
@@ -196,7 +240,7 @@ def draw_time_boxes(display, playerW, playerB):
 def update_players_time(display, players, start_time, pause_time, is_move):
     playerW = players[0]
     playerB = players[1]
-    
+
     if GAME_TIME == 1000:
         pass # unlimited
     elif is_move:
@@ -402,93 +446,149 @@ def chess_window(display):
         if not resume_clicked:
             update_players_time(display, [playerW, playerB], start_time, pause_time, is_move)
             check_time_end(game, [playerW, playerB])
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    click_pos = pygame.mouse.get_pos()
 
-                    if new_game_button.check_click():
-                        new_game_function()
-                    
-                    if pause_button.check_click():
-                        if resume_clicked:
-                            resume_clicked = False
-                            pause_time = time.time() - start_pause
-                            pause_button.change_images(["Images/Pause_no.png", "Images/Pause_yes.png"])
-                        else:
-                            resume_clicked = True
-                            start_pause = time.time()
-                            pause_button.change_images(["Images/resume_no.png", "Images/resume_yes.png"])
+        global GAME_OPTION
 
-                    if resume_clicked:
-                        continue
-                    if click_pos[0] >= 510 or click_pos[1] >= 480:
-                        continue
-                    if len(first_click) == 0:
-                        pos = create_pos(click_pos)
-                        if is_move:
-                            if game.check_choosen_figure(playerW, pos):
-                                next_fields_list = game.get_next_fields_list(pos)
-                                first_click = click_pos
-                        else:
-                            if game.check_choosen_figure(playerB, pos):
-                                next_fields_list = game.get_next_fields_list(pos)
-                                first_click = click_pos
-                    elif len(first_click) == 2:
-                        old_pos = create_pos(first_click)
-                        new_pos = create_pos(click_pos)
+        if is_move or not is_move and GAME_OPTION:
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        click_pos = pygame.mouse.get_pos()
 
-                        if game.check_move(old_pos, new_pos):
-                            figure = copy.deepcopy(game.get_board().get_array()[new_pos[0]][new_pos[1]])
-                            if figure.get_name() != " ":
-                                game.add_to_broken_figures(figure)
-                            game.move(old_pos, new_pos)
-                            if game.check_if_pawn_converting(new_pos):
-                                draw_pawn_converting_window(display, game.get_board().get_array()[new_pos[0]][new_pos[1]])
-                                replacing_pawn(game.get_board(), game.get_board().get_array()[new_pos[0]][new_pos[1]])
-                                notation = game.get_chess_notation()
-                                string = notation[len(notation) - 1]
-                                new_string = string[0:3] + game.get_board().get_array()[new_pos[0]][new_pos[1]].get_name() + string[3:]
-                                notation[len(notation) - 1] = new_string
-                                game.set_chess_notation(notation)
+                        if new_game_button.check_click():
+                            #new_game_function()
+                            QUIT_CONST[0] = True
+                            global NEW_GAME_BTN
+                            NEW_GAME_BTN = True
 
-                            check_king_pos = []
-
-                            if is_move:
-                                is_move = False
-                                if game.get_board().is_checkmate(False):
-                                    winner = playerW
-                                    chackmate_king_pos = game.get_board().get_kingB_position()
-                                    # game.set_winner_message("White won!!!")
-                                    game.set_result(1)
-                                    game.set_checkmate_notation()
-                                    play_sound("Sounds/Checkmate.mp3")
-                                    break
-                                if game.get_board().is_check(False):
-                                    check_king_pos = game.get_board().get_kingB_position()
-                                    game.set_check_notation()
-                                    play_sound("Sounds/Check.mp3")
+                        if pause_button.check_click():
+                            if resume_clicked:
+                                resume_clicked = False
+                                pause_time = time.time() - start_pause
+                                pause_button.change_images(["Images/Pause_no.png", "Images/Pause_yes.png"])
                             else:
-                                is_move = True
-                                if game.get_board().is_checkmate(True):
-                                    winner = playerB
-                                    chackmate_king_pos = game.get_board().get_kingW_position()
-                                    # game.set_winner_message("Black won!!!")
-                                    game.set_result(0)
-                                    game.set_checkmate_notation()
-                                    play_sound("Sounds/Checkmate.mp3")
-                                    break
-                                if game.get_board().is_check(True):
-                                    check_king_pos = game.get_board().get_kingW_position()
-                                    game.set_check_notation()
-                                    play_sound("Sounds/Check.mp3")
+                                resume_clicked = True
+                                start_pause = time.time()
+                                pause_button.change_images(["Images/resume_no.png", "Images/resume_yes.png"])
 
-                        first_click = []
-                        next_fields_list = []
+                        if resume_clicked:
+                            continue
+                        if click_pos[0] >= 510 or click_pos[1] >= 480:
+                            continue
+                        if len(first_click) == 0:
+                            pos = create_pos(click_pos)
+                            if is_move:
+                                if game.check_choosen_figure(playerW, pos):
+                                    next_fields_list = game.get_next_fields_list(pos)
+                                    first_click = click_pos
+                            else:
+                                if game.check_choosen_figure(playerB, pos):
+                                    next_fields_list = game.get_next_fields_list(pos)
+                                    first_click = click_pos
+                        elif len(first_click) == 2:
+                            old_pos = create_pos(first_click)
+                            new_pos = create_pos(click_pos)
 
-            elif event.type == pygame.QUIT:
-                QUIT_CONST[0] = True
-                QUIT_CONST[1] = "Button"
+                            if game.check_move(old_pos, new_pos):
+                                figure = copy.deepcopy(game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                                if figure.get_name() != " ":
+                                    game.add_to_broken_figures(figure)
+                                game.move(old_pos, new_pos)
+                                if game.check_if_pawn_converting(new_pos):
+                                    draw_pawn_converting_window(display, game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                                    replacing_pawn(game.get_board(), game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                                    notation = game.get_chess_notation()
+                                    string = notation[len(notation) - 1]
+                                    new_string = string[0:3] + game.get_board().get_array()[new_pos[0]][new_pos[1]].get_name() + string[3:]
+                                    notation[len(notation) - 1] = new_string
+                                    game.set_chess_notation(notation)
+
+                                check_king_pos = []
+
+                                if is_move:
+                                    is_move = False
+                                    if game.get_board().is_checkmate(False):
+                                        winner = playerW
+                                        chackmate_king_pos = game.get_board().get_kingB_position()
+                                        # game.set_winner_message("White won!!!")
+                                        game.set_result(1)
+                                        game.set_checkmate_notation()
+                                        play_sound("Sounds/Checkmate.mp3")
+                                        break
+                                    if game.get_board().is_check(False):
+                                        check_king_pos = game.get_board().get_kingB_position()
+                                        game.set_check_notation()
+                                        play_sound("Sounds/Check.mp3")
+                                else:
+                                    is_move = True
+                                    if game.get_board().is_checkmate(True):
+                                        winner = playerB
+                                        chackmate_king_pos = game.get_board().get_kingW_position()
+                                        # game.set_winner_message("Black won!!!")
+                                        game.set_result(0)
+                                        game.set_checkmate_notation()
+                                        play_sound("Sounds/Checkmate.mp3")
+                                        break
+                                    if game.get_board().is_check(True):
+                                        check_king_pos = game.get_board().get_kingW_position()
+                                        game.set_check_notation()
+                                        play_sound("Sounds/Check.mp3")
+
+                            first_click = []
+                            next_fields_list = []
+
+                elif event.type == pygame.QUIT:
+                    QUIT_CONST[0] = True
+                    QUIT_CONST[1] = "Button"
+        else:
+            game.find_the_best_move(is_move, 3, -CHECKMATE, CHECKMATE)
+            next_move = game.get_ai_next_move()
+            old_pos = next_move[0]
+            new_pos = next_move[1]
+            if game.check_move(old_pos, new_pos):
+                figure = copy.deepcopy(game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                if figure.get_name() != " ":
+                    game.add_to_broken_figures(figure)
+                game.move(old_pos, new_pos)
+                if game.check_if_pawn_converting(new_pos):
+                    draw_pawn_converting_window(display, game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                    replacing_pawn(game.get_board(), game.get_board().get_array()[new_pos[0]][new_pos[1]])
+                    notation = game.get_chess_notation()
+                    string = notation[len(notation) - 1]
+                    new_string = string[0:3] + game.get_board().get_array()[new_pos[0]][new_pos[1]].get_name() + string[3:]
+                    notation[len(notation) - 1] = new_string
+                    game.set_chess_notation(notation)
+
+                check_king_pos = []
+
+                if is_move:
+                    is_move = False
+                    if game.get_board().is_checkmate(False):
+                        winner = playerW
+                        chackmate_king_pos = game.get_board().get_kingB_position()
+                        # game.set_winner_message("White won!!!")
+                        game.set_result(1)
+                        game.set_checkmate_notation()
+                        play_sound("Sounds/Checkmate.mp3")
+                        break
+                    if game.get_board().is_check(False):
+                        check_king_pos = game.get_board().get_kingB_position()
+                        game.set_check_notation()
+                        play_sound("Sounds/Check.mp3")
+                else:
+                    is_move = True
+                    if game.get_board().is_checkmate(True):
+                        winner = playerB
+                        chackmate_king_pos = game.get_board().get_kingW_position()
+                        # game.set_winner_message("Black won!!!")
+                        game.set_result(0)
+                        game.set_checkmate_notation()
+                        play_sound("Sounds/Checkmate.mp3")
+                        break
+                    if game.get_board().is_check(True):
+                        check_king_pos = game.get_board().get_kingW_position()
+                        game.set_check_notation()
+                        play_sound("Sounds/Check.mp3")
 
         draw_board(display, chackmate_king_pos, check_king_pos)
         draw_figures(display, game.get_board().get_array(), next_fields_list)
@@ -532,13 +632,30 @@ def main():
     pygame.display.set_icon(program_icon)
 
     global QUIT_CONST
+    global GAME_OPTION
+    global GAME_TIME
+
+    QUIT_CONST[0] = False
+    GAME_OPTION = None
+    GAME_TIME = 0
     lauch_window(display)
+
     if not QUIT_CONST[0]:
-        dialog_window(display)
+        dialog_window_game_type(display)
+        GAME_TIME = 1000
+    if not QUIT_CONST[0] and GAME_OPTION:
+        dialog_window_time(display)
     if not QUIT_CONST[0]:
         chess_window(display)
 
     pygame.quit()
+
+    global NEW_GAME_BTN
+
+    if NEW_GAME_BTN:
+        NEW_GAME_BTN = False
+        main()
+
 
 if __name__ == "__main__":
     main()
